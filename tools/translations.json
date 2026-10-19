@@ -139,13 +139,13 @@
   "请选择模型。": "Select a model.",
   "未完成": "Incomplete",
   "相同": "Equal",
-  "最多 12 个训练租约，每次最多 1 小时；本批仅 Fable、Astra。": "Up to 12 training leases of one hour each; Fable and Astra only in this batch.",
   "B6 → B12：增加租约后的结果": "B6 → B12: results with more leases",
   "独立新运行，每种配置一次；差值包含训练量、策略与随机性变化，不是纯预算因果效应。": "Fresh independent runs, one per configuration. Differences include training volume, strategy, and randomness; they do not isolate a causal budget effect.",
   "B12 · 租约小时": "B12 · Lease hours",
-  "第 6 → 12 次提交的 ANALYSIS：Fable 3.0291 → 2.8941；Astra 3.1706 → 3.0084。后六次仍有改善，是否来自方法创新需结合过程证据。": "ANALYSIS from submissions 6 → 12: Fable 3.0291 → 2.8941; Astra 3.1706 → 3.0084. Both improved in the second half; attributing gains to method innovation requires process evidence.",
   "同一模型：A8 与 B6": "Same model: A8 versus B6",
-  "每个模型／Track 配置采用最新授权尝试。A8、B6、B12 分开保留；新增 B12 仅覆盖 Fable 与 Astra。GLM B6 与 Flash A 的旧失败尝试单独排除。": "The latest authorized attempt is retained per model and Track configuration. A8, B6, and B12 remain separate; B12 covers Fable and Astra only. Earlier failed GLM B6 and Flash A attempts are excluded separately.",
   "A 组通过测量瓶颈改善吞吐，最终加速也包含模型配置变化。Opus 还调整不稳定的训练策略，并放弃实测无收益的权重平均。B6 组两者只差 0.00031 NLL，单次实验不足以区分优劣。": "Both improved Track A throughput by measuring bottlenecks; final speedups also include model configuration changes. Opus corrected unstable training and rejected unhelpful weight averaging. Their B6 results differ by just 0.00031 NLL, too little to distinguish them from single runs.",
-  "Astra 比较上下文长度与校准方案，在 B6 组获得最低的推理耗时点估计。Kimi 在更换验证样本后，把旧、新候选放到相同样本上重测，避免把测量变化误判为进步。": "Astra compared context lengths and calibration choices, achieving the lowest observed inference latency in Track B6. After changing its validation sample, Kimi re-evaluated both candidates on the same examples to distinguish model improvement from a change in measurement."
+  "Astra 比较上下文长度与校准方案，在 B6 组获得最低的推理耗时点估计。Kimi 在更换验证样本后，把旧、新候选放到相同样本上重测，避免把测量变化误判为进步。": "Astra compared context lengths and calibration choices, achieving the lowest observed inference latency in Track B6. After changing its validation sample, Kimi re-evaluated both candidates on the same examples to distinguish model improvement from a change in measurement.",
+  "最多 12 个训练租约，每次最多 1 小时；GLM 5.3 未完成，已排除。": "Up to 12 training leases of one hour each; GLM 5.3 did not finish and is excluded.",
+  "10 个模型完成了 B12；GLM 5.3 的 B12 在第 11 个租约后 Agent 退出、没有 TEST，已排除。负值表示 B12 的 NLL 更低。": "Ten models completed B12. GLM 5.3’s B12 Agent exited after its 11th lease with no TEST, so it is excluded. Negative values mean B12 reached a lower NLL.",
+  "每个模型／Track 配置采用最新授权尝试。A8、B6、B12 分开保留；B12 覆盖 10 个模型。GLM B6 与 Flash A 的旧失败尝试，以及未完成的 GLM B12，单独排除。": "Each model/Track configuration uses its latest authorized attempt. A8, B6, and B12 stay separate; B12 covers 10 models. Earlier failed GLM B6 and Flash A attempts, and the unfinished GLM B12 run, are excluded."
 }

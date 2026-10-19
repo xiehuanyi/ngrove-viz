@@ -49,10 +49,10 @@
 <p class="caption" id="plot-caption"></p>
 </section>
 <section class="panel"><div class="chartheading"><div><h2 id="table-title">Track B · 最终结果</h2><p class="hint">按 NLL 升序排列；提交候选数与元学习次数不同。</p></div><a class="smallbutton" href="__DATA_URL__" download>下载汇总 JSON</a></div><div class="tablewrap"><table><thead><tr><th scope="col">模型</th><th scope="col">TEST NLL ↓</th><th scope="col">Score ↑</th><th scope="col">s/task ↓</th><th scope="col">租约小时</th><th scope="col">候选数</th><th scope="col">ANALYSIS 首 → 末</th></tr></thead><tbody id="results"></tbody></table></div><p class="caption">s/task 为每条任务的推理秒数（1 s = 1000 ms）。Score 与 NLL 来自同一个质量指标。租约小时包含运行环境内的全部占用，不等于纯 GPU 计算时间。</p></section>
-<section class="panel"><h2>B6 → B12：增加租约后的结果</h2><p class="hint">独立新运行，每种配置一次；差值包含训练量、策略与随机性变化，不是纯预算因果效应。</p><div class="tablewrap"><table><thead><tr><th>模型</th><th>B6 · TEST NLL</th><th>B12 · TEST NLL</th><th>B12 − B6</th><th>B12 · s/task</th><th>B12 · 租约小时</th></tr></thead><tbody id="budget-pairs"></tbody></table></div><p class="caption">第 6 → 12 次提交的 ANALYSIS：Fable 3.0291 → 2.8941；Astra 3.1706 → 3.0084。后六次仍有改善，是否来自方法创新需结合过程证据。</p></section>
+<section class="panel"><h2>B6 → B12：增加租约后的结果</h2><p class="hint">独立新运行，每种配置一次；差值包含训练量、策略与随机性变化，不是纯预算因果效应。</p><div class="tablewrap"><table><thead><tr><th>模型</th><th>B6 · TEST NLL</th><th>B12 · TEST NLL</th><th>B12 − B6</th><th>B12 · s/task</th><th>B12 · 租约小时</th></tr></thead><tbody id="budget-pairs"></tbody></table></div><p class="caption">10 个模型完成了 B12；GLM 5.3 的 B12 在第 11 个租约后 Agent 退出、没有 TEST，已排除。负值表示 B12 的 NLL 更低。</p></section>
 <section class="panel"><h2>同一模型：A8 与 B6</h2><p class="hint">这是一组描述性配对，不合并成同一预算下的排名。</p><div class="tablewrap"><table><thead><tr><th scope="col">模型</th><th scope="col">A · TEST NLL</th><th scope="col">B6 · TEST NLL</th><th scope="col">B6 − A</th><th scope="col">较低 NLL</th></tr></thead><tbody id="pairs"></tbody></table></div><p class="caption">负值表示本次 B 的 NLL 更低。结果同时受初始配方、实际训练量、推理配置和随机性影响，差值不等于 RSI 增益。</p></section>
 <section class="panel"><div class="eyebrow">Reading the evidence</div><h2 style="margin-top:8px">三个值得保留的判断</h2><div class="evidence"><article><div class="tag">01 / 方法改进</div><h3>Fable / Opus：完整的反馈闭环</h3><p>A 组通过测量瓶颈改善吞吐，最终加速也包含模型配置变化。Opus 还调整不稳定的训练策略，并放弃实测无收益的权重平均。B6 组两者只差 0.00031 NLL，单次实验不足以区分优劣。</p></article><article><div class="tag">02 / 诊断与取舍</div><h3>Astra / Kimi：不同的适应能力</h3><p>Astra 比较上下文长度与校准方案，在 B6 组获得最低的推理耗时点估计。Kimi 在更换验证样本后，把旧、新候选放到相同样本上重测，避免把测量变化误判为进步。</p></article><article><div class="tag">03 / 归因边界</div><h3>首末涨幅需要结合起点</h3><p>早期保险候选、错误修复、更多梯度训练和方法更新，都可能拉大首末差值。Flash B 到第 5 租约才提交首候选，不能与从第 1 租约开始提交的曲线直接比较涨幅。</p></article></div><details><summary>其余模型的过程证据</summary><ul class="note-list"><li>DeepSeek Flash：B 的高吞吐配方与持续训练获得优秀终点；A 的退火与低学习率续训也改善了自评与候选结果。</li><li>GLM：通过 profiling、CUDA graphs 与位置表示调整提高吞吐；实现收益没有全部转化成最优质量。</li><li>Sonnet：B 修复逐元素输出检查瓶颈，本地 1000 样本耗时约 25 s → 3.4 s；A 的自评未充分覆盖最终表现。</li><li>Sol：B 候选稳定改善，主要沿相同配方续训；方法层改进的独立贡献尚未识别。</li><li>DeepSeek Pro：两轨初始配方、搜索成本和最终结果差异较大。</li><li>Terra / Luna：错误修复、验证覆盖和预算分配仍限制结果；大幅下降不能自动归因于更强元学习。</li></ul></details></section>
-<section class="panel"><h2>数据口径与复现</h2><ul class="note-list"><li>每个模型／Track 配置采用最新授权尝试。A8、B6、B12 分开保留；新增 B12 仅覆盖 Fable 与 Astra。GLM B6 与 Flash A 的旧失败尝试单独排除。</li><li>本批为 host_cli preview，不属于正式 leaderboard；每种配置只有一次运行，未估计训练种子方差。</li><li>A 是研究墙钟上限；B 是训练环境租约上限。部分批次的输出上限等推理配置有差异。</li><li>页面公开模型结果、候选轨迹与汇总指标。该页为一次结果快照，重新构建后更新。</li></ul><details><summary>查看数据身份</summary><p id="provenance" style="overflow-wrap:anywhere;margin-top:12px"></p></details></section>
+<section class="panel"><h2>数据口径与复现</h2><ul class="note-list"><li>每个模型／Track 配置采用最新授权尝试。A8、B6、B12 分开保留；B12 覆盖 10 个模型。GLM B6 与 Flash A 的旧失败尝试，以及未完成的 GLM B12，单独排除。</li><li>本批为 host_cli preview，不属于正式 leaderboard；每种配置只有一次运行，未估计训练种子方差。</li><li>A 是研究墙钟上限；B 是训练环境租约上限。部分批次的输出上限等推理配置有差异。</li><li>页面公开模型结果、候选轨迹与汇总指标。该页为一次结果快照，重新构建后更新。</li></ul><details><summary>查看数据身份</summary><p id="provenance" style="overflow-wrap:anywhere;margin-top:12px"></p></details></section>
 <footer><span>nGrove · RSI as meta-learning</span><a href="https://github.com/xiehuanyi/ngrove-viz/blob/main/tools/build_rsi.py">构建脚本</a><a href="https://github.com/xiehuanyi/ngrove-viz/blob/main/tools/rsi-template.html">页面模板</a><a href="https://arxiv.org/abs/2303.11366">Reflexion</a><a href="https://arxiv.org/abs/2210.14215">Algorithm Distillation</a></footer>
 </main>
 <div id="graph-tooltip" class="graph-tooltip" role="tooltip" hidden></div>
@@ -309,13 +309,19 @@ function drawPlot(rows){
 function labelPoints(svg,points,frame){
  const overlaps=(a,b)=>a.x<b.x+b.width&&b.x<a.x+a.width&&a.y<b.y+b.height&&b.y<a.y+a.height;
  const markers=plottedPoints.map(p=>({x:p.cx-8,y:p.cy-8,width:16,height:16,point:p})),placed=[];
- const spots=[[12,4,'start'],[-12,4,'end'],[0,-14,'middle'],[0,22,'middle'],[11,-10,'start'],[-11,-10,'end'],[11,18,'start'],[-11,18,'end']];
+ const spots=[[12,4,'start'],[-12,4,'end'],[0,-14,'middle'],[0,22,'middle'],[11,-10,'start'],[-11,-10,'end'],[11,18,'start'],[-11,18,'end'],
+  [0,-32,'middle'],[0,40,'middle'],[26,-24,'start'],[-26,-24,'end'],[26,30,'start'],[-26,30,'end'],[40,4,'start'],[-40,4,'end']];
  [...points].sort((a,b)=>a.cy-b.cy||a.cx-b.cx).forEach(p=>{
   for(const [dx,dy,anchor] of spots){
    const text=el(svg,'text',{x:p.cx+dx,y:p.cy+dy,'text-anchor':anchor,class:'point-label',fill:defs[p.row.model][1]},defs[p.row.model][0]);
    const box=text.getBBox(),pad={x:box.x-2,y:box.y-1,width:box.width+4,height:box.height+2};
    const inside=pad.x>=frame.left&&pad.x+pad.width<=frame.right&&pad.y>=frame.top&&pad.y+pad.height<=frame.bottom;
-   if(inside&&!placed.some(b=>overlaps(b,pad))&&!markers.some(m=>m.point!==p&&overlaps(m,pad))){placed.push(pad);return;}
+   if(inside&&!placed.some(b=>overlaps(b,pad))&&!markers.some(m=>m.point!==p&&overlaps(m,pad))){
+    placed.push(pad);
+    // Far labels get a thin leader line back to their point.
+    if(Math.abs(dx)+Math.abs(dy)>30){const tx=Math.max(box.x,Math.min(p.cx,box.x+box.width)),ty=Math.max(box.y,Math.min(p.cy,box.y+box.height));svg.insertBefore(el(svg,'line',{x1:p.cx,y1:p.cy,x2:tx,y2:ty,stroke:defs[p.row.model][1],'stroke-width':1,opacity:.55,'pointer-events':'none'}),svg.querySelector('.chart-point'));}
+    return;
+   }
    text.remove();
   }
  });
@@ -328,7 +334,7 @@ function render(){
  }).join('')||`<tr><td colspan="6">${t('请选择模型。')}</td></tr>`;
  document.querySelectorAll('[data-track]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.track===track)));
  document.querySelectorAll('[data-model]').forEach(b=>b.setAttribute('aria-pressed',String(visible.has(b.dataset.model))));
- $('#track-desc').textContent=t(track==='A'?'最多 8 小时研究墙钟；可多次实验和开租约。':track==='B12'?'最多 12 个训练租约，每次最多 1 小时；本批仅 Fable、Astra。':'最多 6 个训练租约，每次最多 1 小时。');
+ $('#track-desc').textContent=t(track==='A'?'最多 8 小时研究墙钟；可多次实验和开租约。':track==='B12'?'最多 12 个训练租约，每次最多 1 小时；GLM 5.3 未完成，已排除。':'最多 6 个训练租约，每次最多 1 小时。');
  $('#table-title').textContent=t('Track {track} · 最终结果',{track});
  const rows=D.rows.filter(r=>lane(r)===track&&visible.has(r.model)).sort((a,b)=>(a.test_nll??Infinity)-(b.test_nll??Infinity));
  drawPlot(rows);
