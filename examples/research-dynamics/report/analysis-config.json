@@ -1,5 +1,5 @@
 {
-  "schema": "autotrain-synthetic-demo-config-v1",
+  "schema": "ngrove-synthetic-demo-config-v1",
   "synthetic": true,
   "metric": {
     "name": "mean_nll",

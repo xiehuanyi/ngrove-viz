@@ -1,9 +1,9 @@
 ---
-name: autotrain-analysis
-description: Analyze completed AutoTrain / AutoTrain-Bench episodes using Liangyu's research-dynamics design, including results, research curves, budget efficiency, and RSI process evidence. Use for read-only episode analysis, Agent comparisons, and explanations of improvements or failures; not for launching training, rerunning evaluation, or publishing leaderboards.
+name: ngrove-analysis
+description: Analyze completed nGrove episodes, including runs from its earlier AutoTrain-Bench, Benchcore and Envcore releases, using Liangyu's research-dynamics design, including results, research curves, budget efficiency, and RSI process evidence. Use for read-only episode analysis, Agent comparisons, and explanations of improvements or failures; not for launching training, rerunning evaluation, or publishing leaderboards.
 ---
 
-# AutoTrain Results and Research Dynamics Analysis
+# nGrove Results and Research Dynamics Analysis
 
 Turn saved experiment records into auditable results, curves, and process evidence. Explain how delivered quality changed, how much research budget was spent, which improvements informed later research, and how strongly the evidence supports each conclusion. Write reports in English by default, unless the user requests another language. Preserve original field and metric names.
 
@@ -44,7 +44,7 @@ Bind metrics by `candidate_id`; order by `event_seq` / event-stream `seq`. Commi
 
 Compute coverage and fixed-budget loss first. When supported, add target attainment, interval means, improvement rates, and loss-only selection gaps. Separate research expenditure from Candidate execution cost. Slopes and curvature are exploratory descriptions; fitting, significance testing, and an aggregate RSI score are not defaults.
 
-Prefer verified read-only analysis tools. If none exist, write small local programs for the requested analysis in the separate output directory, respecting admission, compatibility, missingness, and reproducibility rules. Do not expand the task into modifying Benchcore or implementing the entire proposal. Validate newly implemented metrics against the hand-calculated cases at the end of the metrics reference, including missing-value states.
+Prefer verified read-only analysis tools. If none exist, write small local programs for the requested analysis in the separate output directory, respecting admission, compatibility, missingness, and reproducibility rules. Do not expand the task into modifying nGrove Core or implementing the entire proposal. Validate newly implemented metrics against the hand-calculated cases at the end of the metrics reference, including missing-value states.
 
 ## Interpret the research process
 

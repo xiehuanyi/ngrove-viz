@@ -31,13 +31,13 @@ def export(snapshot):
         identities = {json.dumps(e['artifact_identities'][key], sort_keys=True) for e in complete}
         if len(identities) != 1:
             raise ValueError(f'Mixed evaluation identities: {key}')
-    # Budget extensions have distinct challenge manifests; enforce identity within each lane.
+    # Budget extensions have distinct research task manifests; enforce identity within each lane.
     lanes = {e['comparison_key']['track_config'] for e in complete}
     for lane in lanes:
         hashes = {e['artifact_identities']['challenge_manifest_sha256'] for e in complete
                   if e['comparison_key']['track_config'] == lane}
         if len(hashes) != 1:
-            raise ValueError(f'Mixed challenge identities within {lane}')
+            raise ValueError(f'Mixed research task identities within {lane}')
     pairs = [(e['model_short'], e['track'], e['comparison_key']['track_config']) for e in episodes]
     if len(set(pairs)) != len(pairs):
         raise ValueError('Select one authorized attempt per model and Track configuration before exporting.')

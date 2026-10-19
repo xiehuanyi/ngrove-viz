@@ -1,5 +1,5 @@
 {
-  "schema": "autotrain-analysis-synthetic-demo-report-v1",
+  "schema": "ngrove-analysis-synthetic-demo-report-v1",
   "synthetic": true,
   "notice": "Entirely invented teaching data. Not official results, actual Agent behavior, or lifecycle receipts.",
   "admission": {
@@ -9,16 +9,16 @@
   },
   "provenance": {
     "input_hashes": {
-      "fixtures/demo.json": "af248ce8faddf4110f9397c0999861046a343bc61784ea484ff0f8800fcd1444",
-      "analysis-config.json": "bf4bc81cc8a3ddcc8860f6599f947335fd9c0a5a55955ce818fcd6d95ec2ad52"
+      "fixtures/demo.json": "59baf384e0ebd1c7fc748ae2a83e325092d522795c8b24fabf0581f7e0cfe904",
+      "analysis-config.json": "66e178c3bb4b540ce06540e60bd56e0333019a9f6ac35b4f1b4ef9e3b9c1a4e4"
     },
-    "tool_sha256": "380743b23d1f689a8ffcbaab02885af661584a96fd3afdbdab67abfbef83cbda",
+    "tool_sha256": "e4c1c0e9f75d1db53c57e72184ee8f6df14e86e6becf35138fdcca24b20c9194",
     "original_result_version": null,
     "identity_algorithms": null,
     "compatibility_adapter": null,
-    "reason": "Demo-only schema; not official Benchcore state.",
+    "reason": "Demo-only schema; not official nGrove state.",
     "configuration": {
-      "schema": "autotrain-synthetic-demo-config-v1",
+      "schema": "ngrove-synthetic-demo-config-v1",
       "synthetic": true,
       "metric": {
         "name": "mean_nll",

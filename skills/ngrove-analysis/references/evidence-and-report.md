@@ -1,6 +1,6 @@
 # Process Evidence and Reporting
 
-Read this reference when interpreting RSI, comparing Agents, or producing a full report. These are suggested derived formats for this skill, not official Benchcore schemas.
+Read this reference when interpreting RSI, comparing Agents, or producing a full report. These are suggested derived formats for this skill, not official nGrove schemas.
 
 ## Three observation layers
 
@@ -64,7 +64,7 @@ Save the actual `analysis-config.json` used:
 
 Choose checkpoints from the comparison design or budget contract, independently of submission habits. For a single trajectory without suitable fixed checkpoints, report event curves first rather than inventing thresholds to populate metrics.
 
-Use an independent schema for `analysis.json`, such as `autotrain-analysis-report-v1`. Retain per episode:
+Use an independent schema for `analysis.json`, such as `ngrove-analysis-report-v1`. Retain per episode:
 
 - Input provenance, cutoff, admission and evidence; original result schema, identity algorithms, Core revision, and compatibility/evidence adapter identities.
 - Analysis tool/script identity, hashes of reports/events/logs actually read, complete configuration and its hash. Hash only authorized files actually read; do not scan hidden data or unrelated directories.
