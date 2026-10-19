@@ -133,8 +133,6 @@ def main():
         data = export(args.snapshot)
     else:
         data = json.loads((ROOT / 'rsi' / 'data.json').read_text())
-    # Reference results published elsewhere stay outside the campaign rows.
-    data['reference_results'] = json.loads((ROOT / 'tools' / 'reference-results.json').read_text())
     payload = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)
     # Catch accidental private paths before writing anything to the public site.
     for token in ['/mnt/', '/home/', '/media/', '/ibex/', 'api_key', 'Authorization', 'agent.stdout']:

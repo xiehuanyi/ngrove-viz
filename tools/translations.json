@@ -147,18 +147,5 @@
   "同一模型：A8 与 B6": "Same model: A8 versus B6",
   "每个模型／Track 配置采用最新授权尝试。A8、B6、B12 分开保留；新增 B12 仅覆盖 Fable 与 Astra。GLM B6 与 Flash A 的旧失败尝试单独排除。": "The latest authorized attempt is retained per model and Track configuration. A8, B6, and B12 remain separate; B12 covers Fable and Astra only. Earlier failed GLM B6 and Flash A attempts are excluded separately.",
   "A 组通过测量瓶颈改善吞吐，最终加速也包含模型配置变化。Opus 还调整不稳定的训练策略，并放弃实测无收益的权重平均。B6 组两者只差 0.00031 NLL，单次实验不足以区分优劣。": "Both improved Track A throughput by measuring bottlenecks; final speedups also include model configuration changes. Opus corrected unstable training and rejected unhelpful weight averaging. Their B6 results differ by just 0.00031 NLL, too little to distinguish them from single runs.",
-  "Astra 比较上下文长度与校准方案，在 B6 组获得最低的推理耗时点估计。Kimi 在更换验证样本后，把旧、新候选放到相同样本上重测，避免把测量变化误判为进步。": "Astra compared context lengths and calibration choices, achieving the lowest observed inference latency in Track B6. After changing its validation sample, Kimi re-evaluated both candidates on the same examples to distinguish model improvement from a change in measurement.",
-  "nGrove 上游参考结果": "nGrove upstream reference results",
-  "来自 nGrove README 的 Results 一节（2026 年 9 月运行）。训练硬件与本页不同，单独列出，不并入图表、排名或统计卡片。": "Reported in the Results section of the nGrove README (runs from September 2026). The training hardware differs from this page, so these results are listed separately and are not added to the charts, rankings or summary cards.",
-  "研究预算": "Research budget",
-  "训练硬件": "Training hardware",
-  "本页 Sol · 1 × H200 · Score": "This page's Sol · 1 × H200 · Score",
-  "上游只公布最终 TEST Score 与每条任务推理耗时，没有 NLL 与候选轨迹。两条都是不计入 leaderboard 的 non-compliant host_cli preview，硬件与 Agent CLI 版本各不相同，不是受控对照。本页 Sol 使用 medium 推理强度。": "Upstream reports only the final TEST score and serving time per task, without NLL or Candidate trajectories. Both runs are non-compliant, leaderboard-ineligible host_cli previews with different hardware and Agent CLI versions, so they are not a controlled comparison. This page's Sol used medium reasoning effort.",
-  "{h} 小时研究墙钟": "{h} h research wall clock",
-  "{n} 个租约 × 每次最多 {h} 小时": "{n} Leases × up to {h} h",
-  "（派生 preview 配置）": " (derived preview profile)",
-  "Agent：{agent} · {model} · {effort} 推理强度": "Agent: {agent} · {model} · {effort} reasoning effort",
-  "来源": "Source",
-  "读取于 {date}": "retrieved {date}",
-  "nGrove 上游参考结果取自其 README，不属于本批数据，不计入统计卡片、图表与排名。": "The nGrove upstream reference results come from its README. They are not part of this campaign and are excluded from the summary cards, charts and rankings."
+  "Astra 比较上下文长度与校准方案，在 B6 组获得最低的推理耗时点估计。Kimi 在更换验证样本后，把旧、新候选放到相同样本上重测，避免把测量变化误判为进步。": "Astra compared context lengths and calibration choices, achieving the lowest observed inference latency in Track B6. After changing its validation sample, Kimi re-evaluated both candidates on the same examples to distinguish model improvement from a change in measurement."
 }
