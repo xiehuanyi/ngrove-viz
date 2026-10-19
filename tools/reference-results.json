@@ -1,0 +1,40 @@
+{
+  "source": {
+    "name": "nGrove README · Results",
+    "url": "https://github.com/liangyuwang/nGrove#results",
+    "commit": "67a9a4255e55496264e401c9b299cb911ca8845b",
+    "retrieved": "2026-10-19"
+  },
+  "task": "lm-pretrain",
+  "period": "2026-09",
+  "agent": "Codex CLI",
+  "model": "gpt-5.6-sol",
+  "reasoning_effort": "high",
+  "core_revision": "84f6a725c59f2c596acf8798e0df6aa4f62948eb",
+  "train_pool_tokens": 9950000000,
+  "eligibility": "non-compliant, leaderboard-ineligible host_cli preview",
+  "rows": [
+    {
+      "track": "A",
+      "budget_hours": 8,
+      "max_leases": null,
+      "lease_hours": null,
+      "hardware": "4 × H100 80 GB",
+      "derived_profile": false,
+      "score": 70.09,
+      "ms": 7.81,
+      "seconds_per_task": 0.00781
+    },
+    {
+      "track": "B",
+      "budget_hours": null,
+      "max_leases": 6,
+      "lease_hours": 1,
+      "hardware": "1 × A100 80 GB",
+      "derived_profile": true,
+      "score": 65.63,
+      "ms": 3.79,
+      "seconds_per_task": 0.00379
+    }
+  ]
+}
