@@ -19,8 +19,6 @@ The dashboard includes model filters, configurable axes, linear/log scales, Cand
 
 The committed data contains 24 completed H200 preview runs: 11 A8, 11 B6, and two B12 extensions (Fable 5.1 and Astra). B12 is the initial view; budget configurations remain separate in charts, with an additional B6/B12 comparison table. The B12 challenge manifest differs only by its added budget configuration; task, data, evaluator and Core identities are retained.
 
-A separate table lists the two reference results reported in the [nGrove README](https://github.com/liangyuwang/nGrove#results) (Codex CLI with `gpt-5.6-sol`, Track A on 4 × H100 and Track B on 1 × A100). They use different hardware, so they stay out of the charts, rankings and summary cards; their source is [`tools/reference-results.json`](tools/reference-results.json).
-
 The data is the H200 preview campaign. It is not the synthetic worked example below and is not a formal leaderboard. The dashboard shows submitted-Candidate observations; it does not implement the analysis skill's complete incumbent/oracle reconstruction or input-admission checks.
 
 ## English analysis skill

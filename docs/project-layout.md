@@ -5,7 +5,6 @@
 | `tools/build_rsi.py` | Standard-library exporter and static HTML builder |
 | `tools/rsi-template.html` | Dashboard HTML, CSS, JavaScript, known model definitions, and campaign-specific narrative |
 | `tools/translations.json` | Embedded Chinese/English UI translations |
-| `tools/reference-results.json` | Externally reported reference results (nGrove README), shown in their own table and kept out of the campaign rows |
 | `rsi/data.json` | Previously published aggregate data used to reproduce the dashboard |
 | `index.html`, `rsi/index.html` | Committed static pages; `/rsi/` is an alias |
 | `dist/` | Ignored static output produced with `--output-dir dist` |
