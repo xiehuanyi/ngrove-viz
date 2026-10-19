@@ -19,7 +19,7 @@ Open **http://127.0.0.1:8000/?lang=en**. Stop the server with Ctrl+C. The genera
 
 The dashboard includes model filters, configurable axes, linear/log scales, Candidate ANALYSIS trajectories, final TEST results, detailed point tooltips, and paired Track A/B tables. Its initial view is final TEST score versus seconds per task on a log axis. Use the language switch or `?lang=en` / `?lang=zh`; switching languages preserves chart selections.
 
-The committed data contains 24 completed H200 preview runs: 11 A8, 11 B6, and two B12 extensions (Fable 5.1 and Astra). Track A, where all 11 models ran, is the initial view; budget configurations remain separate in charts, with an additional B6/B12 comparison table. The B12 research task manifest differs only by its added budget configuration; task, data, evaluator and Core identities are retained.
+The committed data contains 32 completed H200 preview runs: 11 A8, 11 B6, and 10 B12. The GLM 5.3 B12 run did not finish (its Agent exited after 11 Leases with no TEST) and is excluded. Track A, where all 11 models ran, is the initial view; budget configurations remain separate in charts, with an additional B6/B12 comparison table. The B12 research task manifest differs only by its added budget configuration; task, data, evaluator and Core identities are retained.
 
 The data is the H200 preview campaign. It is not the synthetic worked example below and is not a formal leaderboard. The dashboard shows submitted-Candidate observations; it does not implement the analysis skill's complete incumbent/oracle reconstruction or input-admission checks.
 

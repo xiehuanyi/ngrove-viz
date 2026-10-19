@@ -114,7 +114,7 @@ def export(snapshot):
         'runtime': '1 × NVIDIA H200 SXM 141GB', 'task': 'lm-pretrain',
         'selection': 'Latest authorized attempt per model/Track configuration; B6 and B12 retained separately; previous failed attempts excluded.',
         'excluded_attempts': [
-            {'model': v['model'], 'track': v['track'], 'outcome': v['outcome']}
+            {'model': v['model'], 'track': v['track'], 'track_config': v.get('track_config'), 'outcome': v['outcome']}
             for v in source.get('excluded_attempts', [])
         ],
         'preview': True, 'rows': rows,
