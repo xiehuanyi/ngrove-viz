@@ -103,7 +103,7 @@ def main():
     before = {str(p.relative_to(ROOT)): sha(p) for p in (SOURCE, CONFIG)}
     fixture = json.loads(SOURCE.read_text())
     config = json.loads(CONFIG.read_text())
-    assert fixture['schema'] == 'autotrain-synthetic-demo-fixture-v1' and fixture['synthetic'] is True
+    assert fixture['schema'] == 'ngrove-synthetic-demo-fixture-v1' and fixture['synthetic'] is True
     assert config['synthetic'] is True
     A, B = fixture['episodes']
     for episode in (A, B):
@@ -141,13 +141,13 @@ def main():
     assert b[-1]['candidate_id'] == 'B3' and b[-1]['budget'] == 4
 
     metrics = {
-        'schema': 'autotrain-analysis-synthetic-demo-report-v1', 'synthetic': True,
+        'schema': 'ngrove-analysis-synthetic-demo-report-v1', 'synthetic': True,
         'notice': fixture['notice'],
         'admission': {'status': 'synthetic_demonstration_only', 'real_episode_admission': 'not_applicable',
                       'reason': 'No real episodes or workload lifecycle receipts are claimed; this is not an official-result validator.'},
         'provenance': {'input_hashes': before, 'tool_sha256': sha(Path(__file__)),
                        'original_result_version': None, 'identity_algorithms': None,
-                       'compatibility_adapter': None, 'reason': 'Demo-only schema; not official Benchcore state.',
+                       'compatibility_adapter': None, 'reason': 'Demo-only schema; not official nGrove state.',
                        'configuration': config},
         'comparison': {'combined_ranking': False, 'reason': 'Independent illustrative Tracks; no cross-Track ranking.'},
         'episodes': {
@@ -219,7 +219,7 @@ def main():
     fig, axes = plt.subplots(2, 1, figsize=(12, 9), gridspec_kw={'height_ratios': [1.4, 1]})
     fig.subplots_adjust(top=.84, bottom=.09, left=.09, right=.96, hspace=.60)
     fig.text(.09, .955, 'How research decisions become measurable', fontsize=22, weight='bold')
-    fig.text(.09, .918, 'AUTOTRAIN ANALYSIS DEMO  /  ALL DATA ARE SYNTHETIC', fontsize=11, color='#a15c00', weight='bold')
+    fig.text(.09, .918, 'NGROVE ANALYSIS DEMO  /  ALL DATA ARE SYNTHETIC', fontsize=11, color='#a15c00', weight='bold')
     ax = axes[0]
     ax.axvspan(0, 1, color='#e9edf3', alpha=.9)
     xs = [p['budget'] / 3600 for p in a]
@@ -259,9 +259,9 @@ def main():
 
     a_lines = '\n'.join(f"| {p['budget']/3600:g} | {p['candidate_id'] or 'None'} | {p['loss'] if p['loss'] is not None else 'Unknown'} | {p['oracle_loss'] if p['oracle_loss'] is not None else 'Unknown'} |" for p in a if p['budget'] in config['A']['checkpoints_seconds'])
     b_lines = '\n'.join(f"| {p['budget']} | {p['candidate_id']} | {p['loss'] if p['loss'] is not None else 'Unknown'} | {p['oracle_loss']} |" for p in b)
-    report = f'''# AutoTrain Analysis — Worked Demo
+    report = f'''# nGrove Analysis — Worked Demo
 
-**SYNTHETIC EXAMPLE. Every number and process note below is invented.** This demonstrates the output of the `autotrain-analysis` skill; it is not a benchmark result, an actual Agent trace, or a production analyzer.
+**SYNTHETIC EXAMPLE. Every number and process note below is invented.** This demonstrates the output of the `ngrove-analysis` skill; it is not a benchmark result, an actual Agent trace, or a production analyzer.
 
 ## What the analysis reveals
 
@@ -276,7 +276,7 @@ def main():
 
 Both cases use mean NLL, lower being better. A uses recorded elapsed seconds, displayed as hours. B uses consumed Leases, with each checkpoint cut off before the next Lease is consumed; the final checkpoint uses the synthetic seal event. The target 3.5 and the domains/weights are explicitly selected teaching settings, not recommended defaults.
 
-Input schema: `autotrain-synthetic-demo-fixture-v1`. Real-episode admission is **not applicable**: the fixture contains no actual workload receipts. Nothing was trained, evaluated, resumed, or published. A production analysis would require the skill's sealing, termination, cleanup, publication, identity, and consistency checks.
+Input schema: `ngrove-synthetic-demo-fixture-v1`. Real-episode admission is **not applicable**: the fixture contains no actual workload receipts. Nothing was trained, evaluated, resumed, or published. A production analysis would require the skill's sealing, termination, cleanup, publication, identity, and consistency checks.
 
 ## Computed summary
 

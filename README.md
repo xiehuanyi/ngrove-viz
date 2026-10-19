@@ -1,40 +1,42 @@
-# AutoTrain Visualization and Analysis Skill
+# nGrove Visualization and Analysis Skill
 
-A portable static dashboard, an English analysis skill, and a reproducible worked example for AutoTrain-Bench results. Run the website locally without a GitHub account, token, backend, or frontend package installation. GitHub hosting is optional.
+A portable static dashboard, an English analysis skill, and a reproducible worked example for [nGrove](https://github.com/liangyuwang/nGrove) results. Run the website locally without a GitHub account, token, backend, or frontend package installation. GitHub hosting is optional.
+
+This repository was previously named `autotrain-bench-viz`, and nGrove was previously AutoTrain-Bench. Older links to the repository redirect here; the hosted page is now at <https://xiehuanyi.github.io/ngrove-viz/>.
 
 ## Run locally
 
 Requirements: Python 3.9+ for the dashboard. Clone or download this repository, then run:
 
 ```sh
-git clone https://github.com/xiehuanyi/autotrain-bench-viz.git
-cd autotrain-bench-viz
+git clone https://github.com/xiehuanyi/ngrove-viz.git
+cd ngrove-viz
 python3 tools/build_rsi.py --output-dir dist
 python3 -m http.server 8000 --bind 127.0.0.1 --directory dist
 ```
 
 Open **http://127.0.0.1:8000/?lang=en**. Stop the server with Ctrl+C. The generated `dist/index.html` embeds its data and translations and can also be opened directly without a server. Copy the entire `dist/` directory when sharing the static site, including its downloadable JSON.
 
-The dashboard includes model filters, configurable axes, linear/log scales, Candidate ANALYSIS trajectories, final TEST results, detailed point tooltips, and paired Track A/B tables. Its initial view is final TEST score versus seconds per task. Use the language switch or `?lang=en` / `?lang=zh`; switching languages preserves chart selections.
+The dashboard includes model filters, configurable axes, linear/log scales, Candidate ANALYSIS trajectories, final TEST results, detailed point tooltips, and paired Track A/B tables. Its initial view is final TEST score versus seconds per task on a log axis. Use the language switch or `?lang=en` / `?lang=zh`; switching languages preserves chart selections.
 
-The committed data contains 24 completed H200 preview runs: 11 A8, 11 B6, and two B12 extensions (Fable 5.1 and Astra). B12 is the initial view; budget configurations remain separate in charts, with an additional B6/B12 comparison table. The B12 challenge manifest differs only by its added budget configuration; task, data, evaluator and Core identities are retained.
+The committed data contains 24 completed H200 preview runs: 11 A8, 11 B6, and two B12 extensions (Fable 5.1 and Astra). Track A, where all 11 models ran, is the initial view; budget configurations remain separate in charts, with an additional B6/B12 comparison table. The B12 research task manifest differs only by its added budget configuration; task, data, evaluator and Core identities are retained.
 
 The data is the H200 preview campaign. It is not the synthetic worked example below and is not a formal leaderboard. The dashboard shows submitted-Candidate observations; it does not implement the analysis skill's complete incumbent/oracle reconstruction or input-admission checks.
 
 ## English analysis skill
 
-The [autotrain-analysis skill](skills/autotrain-analysis/SKILL.md) follows Liangyu Wang's [research-dynamics design](https://github.com/liangyuwang/AutoTrain-Bench/blob/811d6a559270e4b4ea838aba1224dc330b62fb97/docs/research-dynamics.md). It covers:
+The [ngrove-analysis skill](skills/ngrove-analysis/SKILL.md) follows Liangyu Wang's [research-dynamics design](https://github.com/liangyuwang/nGrove/blob/811d6a559270e4b4ea838aba1224dc330b62fb97/docs/research-dynamics.md). It covers:
 
 - Input admission, historical result compatibility, provenance, and coverage.
 - Submitted, incumbent, and observed-oracle curves, with distinct Track A/B budgets.
 - Target attainment, missing-data handling, selection gaps, and serving cost.
 - Process evidence for improvements and reuse, with explicit limits on RSI claims.
 
-To install, copy the **entire** `skills/autotrain-analysis/` directory into your Codex skills directory (`$CODEX_HOME/skills`, or `~/.codex/skills` by default). Keep its `references/` and `agents/` subdirectories. If a skill with that name is already installed, compare it before replacing it.
+To install, copy the **entire** `skills/ngrove-analysis/` directory into your Codex skills directory (`$CODEX_HOME/skills`, or `~/.codex/skills` by default). Keep its `references/` and `agents/` subdirectories. If a skill with that name is already installed, compare it before replacing it.
 
 Then ask:
 
-> Use $autotrain-analysis to analyze completed episodes in my AutoTrain project and produce an auditable English report.
+> Use $ngrove-analysis to analyze completed episodes in my nGrove project and produce an auditable English report.
 
 The skill is a workflow, not a bundled production `bench_analysis` package. It can guide an agent in writing the read-only analysis needed for a task. It does not launch training or rerun hidden evaluations.
 
@@ -77,7 +79,7 @@ Any static host can serve `dist/`. You can keep using it locally without enablin
 
 For your own GitHub site, see [deployment instructions](docs/deployment.md). An [inactive, manual Pages workflow template](deploy/github-pages.yml.example) is included. Enable it only in a repository you control; it uses that repository's automatically issued `GITHUB_TOKEN`. No maintainer credentials are distributed or required.
 
-The original repository's [existing hosted preview](https://xiehuanyi.github.io/autotrain-bench-viz/) is a separate deployment choice. Cloning the code does not configure hosting for your account.
+The original repository's [existing hosted preview](https://xiehuanyi.github.io/ngrove-viz/) is a separate deployment choice. Cloning the code does not configure hosting for your account.
 
 ## Interpretation
 

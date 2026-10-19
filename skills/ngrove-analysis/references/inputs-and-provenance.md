@@ -5,22 +5,22 @@ Read this reference when locating experiments or validating historical data.
 ## Method source and project discovery
 
 - Author: `liangyuwang` (Liangyu Wang).
-- Primary source: [Research Dynamics and RSI Diagnostics, pinned revision](https://github.com/liangyuwang/AutoTrain-Bench/blob/811d6a559270e4b4ea838aba1224dc330b62fb97/docs/research-dynamics.md). Commit `811d6a559270e4b4ea838aba1224dc330b62fb97`, timestamp `2026-09-17T01:50:42+08:00`.
+- Primary source: [Research Dynamics and RSI Diagnostics, pinned revision](https://github.com/liangyuwang/nGrove/blob/811d6a559270e4b4ea838aba1224dc330b62fb97/docs/research-dynamics.md). Commit `811d6a559270e4b4ea838aba1224dc330b62fb97`, timestamp `2026-09-17T01:50:42+08:00`.
 - Interface baseline recorded in the document: `1868b7e7c9de2d38174f58614b65c0ce18f605a1`, checked on 2026-09-16. The new package, CLI, schemas, and tests are proposals.
 - Supporting specifications: the same revision's `docs/benchmark-reference.md`, especially ANALYSIS, Intermediate Incumbents and Research Curves, Evaluation Axes, and Failures; also `benchcore/results.py` and `artifact_identity.py`.
 - This skill operationalizes those specifications. Local navigation, configuration, and output-field suggestions are not schemas already implemented by the source document.
 
-Locate the AutoTrain project from the user's working directory or an explicitly supplied path. Do not assume a particular machine, username, remote host, or deployment layout.
+Locate the nGrove project from the user's working directory or an explicitly supplied path. Do not assume a particular machine, username, remote host, or deployment layout.
 
 | Artifact | Discovery and use |
 | --- | --- |
-| Benchcore checkout | Read its applicable `AGENTS.md`, `docs/research-dynamics.md`, and specifications matching the experiment revision. A local mirror may not be a Git checkout or the latest version. |
+| nGrove checkout | Read its applicable `AGENTS.md`, `docs/research-dynamics.md`, and specifications matching the experiment revision. A local mirror may not be a Git checkout or the latest version. |
 | Episode directories or archive | Locate `state.json` and `events.jsonl` within the user's stated scope. Different directories may represent different campaigns; check each identity. |
 | Viewer selection manifest / extracted JSON | Use selection, generation time, and provenance for discovery. These do not replace admission or complete event records. |
 | Existing analyses | Useful navigation aids, but do not inherit their conclusions or assume old scripts satisfy this design. |
 | Output directory | Use a dedicated user-selected directory or a new `analysis/<date>-<topic>/` directory outside all source episodes and snapshots. Preserve earlier reports. |
 
-The companion visualization repository contains this skill under `skills/autotrain-analysis/`, a public aggregate dashboard, and an invented worked example under `examples/research-dynamics/`. The example uses a demo-only schema; it is not a production episode loader or evidence about actual Agents. The dashboard's submitted-Candidate plots do not implement this skill's complete incumbent/oracle and admission analysis.
+The companion visualization repository contains this skill under `skills/ngrove-analysis/`, a public aggregate dashboard, and an invented worked example under `examples/research-dynamics/`. The example uses a demo-only schema; it is not a production episode loader or evidence about actual Agents. The dashboard's submitted-Candidate plots do not implement this skill's complete incumbent/oracle and admission analysis.
 
 Do not automatically run host-specific refresh, publishing, or experiment-launch scripts. Check Git status before updating documentation; a fast-forward pull is appropriate when synchronization is authorized and safe. Record documentation and experiment revisions separately rather than upgrading historical experiments to a new protocol.
 

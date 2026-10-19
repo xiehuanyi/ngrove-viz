@@ -1,6 +1,6 @@
-# AutoTrain Analysis — Worked Demo
+# nGrove Analysis — Worked Demo
 
-**SYNTHETIC EXAMPLE. Every number and process note below is invented.** This demonstrates the output of the `autotrain-analysis` skill; it is not a benchmark result, an actual Agent trace, or a production analyzer.
+**SYNTHETIC EXAMPLE. Every number and process note below is invented.** This demonstrates the output of the `ngrove-analysis` skill; it is not a benchmark result, an actual Agent trace, or a production analyzer.
 
 ## What the analysis reveals
 
@@ -15,7 +15,7 @@
 
 Both cases use mean NLL, lower being better. A uses recorded elapsed seconds, displayed as hours. B uses consumed Leases, with each checkpoint cut off before the next Lease is consumed; the final checkpoint uses the synthetic seal event. The target 3.5 and the domains/weights are explicitly selected teaching settings, not recommended defaults.
 
-Input schema: `autotrain-synthetic-demo-fixture-v1`. Real-episode admission is **not applicable**: the fixture contains no actual workload receipts. Nothing was trained, evaluated, resumed, or published. A production analysis would require the skill's sealing, termination, cleanup, publication, identity, and consistency checks.
+Input schema: `ngrove-synthetic-demo-fixture-v1`. Real-episode admission is **not applicable**: the fixture contains no actual workload receipts. Nothing was trained, evaluated, resumed, or published. A production analysis would require the skill's sealing, termination, cleanup, publication, identity, and consistency checks.
 
 ## Computed summary
 
@@ -81,6 +81,6 @@ Sources: [synthetic process notes](../fixtures/demo.json), `/process_notes/0` th
 
 Rebuild with Python 3 and matplotlib using `python build_demo.py` from the demo directory. The script only accepts the synthetic demo schema and writes into `report/`. It checks the step-integral example, undeclared-candidate handling, regression, repeated declarations, missing quality, target ambiguity, and failed-Lease accounting. Inputs are hashed before and after execution and must remain unchanged. Identical input/configuration gives identical numerical results.
 
-Source fixture SHA-256: `af248ce8faddf4110f9397c0999861046a343bc61784ea484ff0f8800fcd1444`.
+Source fixture SHA-256: `59baf384e0ebd1c7fc748ae2a83e325092d522795c8b24fabf0581f7e0cfe904`.
 
-Configuration SHA-256: `bf4bc81cc8a3ddcc8860f6599f947335fd9c0a5a55955ce818fcd6d95ec2ad52`.
+Configuration SHA-256: `66e178c3bb4b540ce06540e60bd56e0333019a9f6ac35b4f1b4ef9e3b9c1a4e4`.

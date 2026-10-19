@@ -1,5 +1,5 @@
 {
-  "schema": "autotrain-synthetic-demo-fixture-v1",
+  "schema": "ngrove-synthetic-demo-fixture-v1",
   "synthetic": true,
   "notice": "Entirely invented teaching data. Not official results, actual Agent behavior, or lifecycle receipts.",
   "episodes": [
