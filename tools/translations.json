@@ -10,7 +10,6 @@
   "研究模型": "Research agent models",
   "已完成实验": "Completed experiments",
   "Track A / Track B 预算上限": "Track A / Track B budget limits",
-  "相同任务、数据及评估器": "Same task, data, and evaluator",
   "如何解读：": "How to read this: ",
   "A 与 B 都允许自我改进，预算规则不同。这里展示观察结果，尚无同预算 RSI-off 对照。ANALYSIS 分数在研究结束后计算，并不是 Agent 当时获得的反馈。": "Both tracks allow self-improvement under different budget rules. These are observational results, with no equal-budget RSI-off control. ANALYSIS scores are computed after research ends; the agent did not receive them as feedback.",
   "选择比较范围": "Choose what to compare",
@@ -77,7 +76,6 @@
   "查看数据身份": "View data provenance",
   "构建脚本": "Build script",
   "页面模板": "Page template",
-  "数据快照：{time} · lm-pretrain · 单卡 H200": "Snapshot: {time} · lm-pretrain · single H200",
   "Core: {revision} · 源快照 SHA256: {hash}": "Core: {revision} · Source snapshot SHA256: {hash}",
   "困惑度 PPL ↓": "Perplexity PPL ↓",
   "推理耗时 / ms per task ↓": "Inference latency / ms per task ↓",
@@ -147,5 +145,9 @@
   "Astra 比较上下文长度与校准方案，在 B6 组获得最低的推理耗时点估计。Kimi 在更换验证样本后，把旧、新候选放到相同样本上重测，避免把测量变化误判为进步。": "Astra compared context lengths and calibration choices, achieving the lowest observed inference latency in Track B6. After changing its validation sample, Kimi re-evaluated both candidates on the same examples to distinguish model improvement from a change in measurement.",
   "最多 12 个训练租约，每次最多 1 小时；GLM 5.3 未完成，已排除。": "Up to 12 training leases of one hour each; GLM 5.3 did not finish and is excluded.",
   "10 个模型完成了 B12；GLM 5.3 的 B12 在第 11 个租约后 Agent 退出、没有 TEST，已排除。负值表示 B12 的 NLL 更低。": "Ten models completed B12. GLM 5.3’s B12 Agent exited after its 11th lease with no TEST, so it is excluded. Negative values mean B12 reached a lower NLL.",
-  "每个模型／Track 配置采用最新授权尝试。A8、B6、B12 分开保留；B12 覆盖 10 个模型。GLM B6 与 Flash A 的旧失败尝试，以及未完成的 GLM B12，单独排除。": "Each model/Track configuration uses its latest authorized attempt. A8, B6, and B12 stay separate; B12 covers 10 models. Earlier failed GLM B6 and Flash A attempts, and the unfinished GLM B12 run, are excluded."
+  "每个模型／Track 配置采用最新授权尝试。A8、B6、B12 分开保留；B12 覆盖 10 个模型。GLM B6 与 Flash A 的旧失败尝试，以及未完成的 GLM B12，单独排除。": "Each model/Track configuration uses its latest authorized attempt. A8, B6, and B12 stay separate; B12 covers 10 models. Earlier failed GLM B6 and Flash A attempts, and the unfinished GLM B12 run, are excluded.",
+  "两种硬件分开比较": "Hardware lanes compared separately",
+  "数据快照：{time} · lm-pretrain · H200 与 TPU v5e": "Snapshot: {time} · lm-pretrain · H200 and TPU v5e",
+  "4 × Cloud TPU v5e，最多 6 小时研究墙钟。7 个模型走 opencode 容器与推理网关；标 host_cli 的 4 个经 Codex/Cursor 订阅运行，不直接可比。": "4 × Cloud TPU v5e, up to 6 hours of research wall-clock time. Seven models ran in the opencode container behind the inference gateway; the four marked host_cli ran through Codex/Cursor subscriptions and are not directly comparable.",
+  "TPU v5e · A 6 h：同一 lm-pretrain 任务（JAX 训练镜像），1 台 4 × Cloud TPU v5e，每模型一次运行。7 个模型（Astra、Opus 5、Fable 5.1、Sonnet 5、DeepSeek Pro、DeepSeek Flash 4.1、GLM 5.3）走 opencode 容器 + 推理网关；Sol 6.1、Luna 6、Terra 经 Codex（ChatGPT Pro）、Kimi K3 经 Cursor 以 host_cli 运行，工具不同，不直接可比。Sol 6.1、Luna 6 与 DeepSeek Flash 4.1 是比 H200 批次更新的版本。因中转余额或配额中止的尝试已排除。": "TPU v5e · A 6 h: the same lm-pretrain task (JAX training image) on one host with 4 × Cloud TPU v5e, one run per model. Seven models (Astra, Opus 5, Fable 5.1, Sonnet 5, DeepSeek Pro, DeepSeek Flash 4.1, GLM 5.3) ran in the opencode container behind the inference gateway; Sol 6.1, Luna 6 and Terra ran through Codex (ChatGPT Pro) and Kimi K3 through Cursor as host_cli, a different tool and not directly comparable. Sol 6.1, Luna 6 and DeepSeek Flash 4.1 are newer versions than in the H200 campaign. Attempts stopped by relay balance or quota are excluded."
 }
