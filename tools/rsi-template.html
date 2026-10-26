@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="nGrove H200 preview runs: compare models, postmortem candidate trajectories, and RSI as meta-learning.">
+<meta name="description" content="nGrove H200 and Cloud TPU v5e preview runs: compare models, postmortem candidate trajectories, and RSI as meta-learning.">
 <title>nGrove · RSI / Meta-learning</title>
 <style>
 :root{color-scheme:light;--bg:#f5f6f9;--paper:#fff;--ink:#202337;--muted:#656c80;--line:#e5e7ef;--accent:#6154c7;--soft:#eeebff;--green:#178172;--orange:#bc7651}
@@ -31,10 +31,10 @@
 <body>
 <header><nav class="nav" aria-label="页面导航"><a class="brand" href="https://github.com/liangyuwang/nGrove">nGrove</a><a class="active" href="#" aria-current="page">RSI 分析</a><a href="#table-title">最新实验结果</a><div class="grow"></div><a href="https://github.com/xiehuanyi/ngrove-viz/tree/main/tools">可视化脚本 ↗</a><div class="seg language-switch" role="group" aria-label="页面语言"><button type="button" data-lang="zh" lang="zh-CN" aria-pressed="true">中文</button><button type="button" data-lang="en" lang="en" aria-pressed="false">English</button></div></nav></header>
 <main class="wrap">
-<div class="intro"><div class="eyebrow">Research notes / H200 experiments</div><h1>从实验中学习，模型做得如何？</h1><p class="muted">把 RSI 看作 meta-learning：内层训练语言模型，外层根据实验反馈调整方法。一起看最终质量、候选轨迹，以及每次改进花掉的预算。</p><div class="stamp" id="stamp"></div></div>
-<section class="stats" aria-label="实验概况"><div class="stat"><div class="value" id="model-count"></div><div class="label">研究模型</div></div><div class="stat"><div class="value" id="complete-count"></div><div class="label">已完成实验</div></div><div class="stat"><div class="value" style="font-size:18px">A: 8 h<br>B: 6 / 12 × 1 h</div><div class="label">Track A / Track B 预算上限</div></div><div class="stat"><div class="value">1 × H200</div><div class="label">相同任务、数据及评估器</div></div></section>
+<div class="intro"><div class="eyebrow">Research notes / H200 &amp; TPU experiments</div><h1>从实验中学习，模型做得如何？</h1><p class="muted">把 RSI 看作 meta-learning：内层训练语言模型，外层根据实验反馈调整方法。一起看最终质量、候选轨迹，以及每次改进花掉的预算。</p><div class="stamp" id="stamp"></div></div>
+<section class="stats" aria-label="实验概况"><div class="stat"><div class="value" id="model-count"></div><div class="label">研究模型</div></div><div class="stat"><div class="value" id="complete-count"></div><div class="label">已完成实验</div></div><div class="stat"><div class="value" style="font-size:18px">A: 8 h · B: 6 / 12 × 1 h<br>TPU A: 6 h</div><div class="label">Track A / Track B 预算上限</div></div><div class="stat"><div class="value" style="font-size:18px">1 × H200<br>4 × TPU v5e</div><div class="label">两种硬件分开比较</div></div></section>
 <div class="notice"><strong>如何解读：</strong>A 与 B 都允许自我改进，预算规则不同。这里展示观察结果，尚无同预算 RSI-off 对照。ANALYSIS 分数在研究结束后计算，并不是 Agent 当时获得的反馈。</div>
-<section class="panel" aria-labelledby="filter-title"><h2 id="filter-title">选择比较范围</h2><div class="filters"><div class="seg" aria-label="选择 Track"><button data-track="A" aria-pressed="true">Track A · 8 h</button><button data-track="B6" aria-pressed="false">Track B · 6</button><button data-track="B12" aria-pressed="false">Track B · 12</button></div><span id="track-desc" class="hint"></span><span class="grow"></span><button id="all" class="smallbutton">全部模型</button><button id="leading" class="smallbutton">聚焦主要模型</button></div><div class="legend" id="legend" aria-label="筛选模型"></div><p class="caption">点击模型名称可隐藏或恢复；图表和结果表会同步更新。默认显示全部模型。</p></section>
+<section class="panel" aria-labelledby="filter-title"><h2 id="filter-title">选择比较范围</h2><div class="filters"><div class="seg" aria-label="选择 Track"><button data-track="A" aria-pressed="true">Track A · 8 h</button><button data-track="B6" aria-pressed="false">Track B · 6</button><button data-track="B12" aria-pressed="false">Track B · 12</button><button data-track="TPU" aria-pressed="false">TPU v5e · A 6 h</button></div><span id="track-desc" class="hint"></span><span class="grow"></span><button id="all" class="smallbutton">全部模型</button><button id="leading" class="smallbutton">聚焦主要模型</button></div><div class="legend" id="legend" aria-label="筛选模型"></div><p class="caption">点击模型名称可隐藏或恢复；图表和结果表会同步更新。默认显示全部模型。</p></section>
 <section class="panel plot-panel" aria-labelledby="plot-title">
 <h2 id="plot-title">自定义比较图</h2><p class="hint">横纵轴可选 Score、NLL、PPL、推理耗时、吞吐、预算等指标。悬停点附近即可查看详细信息。</p>
 <div class="plot-presets" aria-label="常用指标组合"><button type="button" class="smallbutton" data-preset="score-time">Score × 时间</button><button type="button" class="smallbutton" data-preset="nll-time">NLL × 时间</button><button type="button" class="smallbutton" data-preset="score-cost">Score × s/task</button></div>
@@ -52,7 +52,7 @@
 <section class="panel"><h2>B6 → B12：增加租约后的结果</h2><p class="hint">独立新运行，每种配置一次；差值包含训练量、策略与随机性变化，不是纯预算因果效应。</p><div class="tablewrap"><table><thead><tr><th>模型</th><th>B6 · TEST NLL</th><th>B12 · TEST NLL</th><th>B12 − B6</th><th>B12 · s/task</th><th>B12 · 租约小时</th></tr></thead><tbody id="budget-pairs"></tbody></table></div><p class="caption">10 个模型完成了 B12；GLM 5.3 的 B12 在第 11 个租约后 Agent 退出、没有 TEST，已排除。负值表示 B12 的 NLL 更低。</p></section>
 <section class="panel"><h2>同一模型：A8 与 B6</h2><p class="hint">这是一组描述性配对，不合并成同一预算下的排名。</p><div class="tablewrap"><table><thead><tr><th scope="col">模型</th><th scope="col">A · TEST NLL</th><th scope="col">B6 · TEST NLL</th><th scope="col">B6 − A</th><th scope="col">较低 NLL</th></tr></thead><tbody id="pairs"></tbody></table></div><p class="caption">负值表示本次 B 的 NLL 更低。结果同时受初始配方、实际训练量、推理配置和随机性影响，差值不等于 RSI 增益。</p></section>
 <section class="panel"><div class="eyebrow">Reading the evidence</div><h2 style="margin-top:8px">三个值得保留的判断</h2><div class="evidence"><article><div class="tag">01 / 方法改进</div><h3>Fable / Opus：完整的反馈闭环</h3><p>A 组通过测量瓶颈改善吞吐，最终加速也包含模型配置变化。Opus 还调整不稳定的训练策略，并放弃实测无收益的权重平均。B6 组两者只差 0.00031 NLL，单次实验不足以区分优劣。</p></article><article><div class="tag">02 / 诊断与取舍</div><h3>Astra / Kimi：不同的适应能力</h3><p>Astra 比较上下文长度与校准方案，在 B6 组获得最低的推理耗时点估计。Kimi 在更换验证样本后，把旧、新候选放到相同样本上重测，避免把测量变化误判为进步。</p></article><article><div class="tag">03 / 归因边界</div><h3>首末涨幅需要结合起点</h3><p>早期保险候选、错误修复、更多梯度训练和方法更新，都可能拉大首末差值。Flash B 到第 5 租约才提交首候选，不能与从第 1 租约开始提交的曲线直接比较涨幅。</p></article></div><details><summary>其余模型的过程证据</summary><ul class="note-list"><li>DeepSeek Flash：B 的高吞吐配方与持续训练获得优秀终点；A 的退火与低学习率续训也改善了自评与候选结果。</li><li>GLM：通过 profiling、CUDA graphs 与位置表示调整提高吞吐；实现收益没有全部转化成最优质量。</li><li>Sonnet：B 修复逐元素输出检查瓶颈，本地 1000 样本耗时约 25 s → 3.4 s；A 的自评未充分覆盖最终表现。</li><li>Sol：B 候选稳定改善，主要沿相同配方续训；方法层改进的独立贡献尚未识别。</li><li>DeepSeek Pro：两轨初始配方、搜索成本和最终结果差异较大。</li><li>Terra / Luna：错误修复、验证覆盖和预算分配仍限制结果；大幅下降不能自动归因于更强元学习。</li></ul></details></section>
-<section class="panel"><h2>数据口径与复现</h2><ul class="note-list"><li>每个模型／Track 配置采用最新授权尝试。A8、B6、B12 分开保留；B12 覆盖 10 个模型。GLM B6 与 Flash A 的旧失败尝试，以及未完成的 GLM B12，单独排除。</li><li>本批为 host_cli preview，不属于正式 leaderboard；每种配置只有一次运行，未估计训练种子方差。</li><li>A 是研究墙钟上限；B 是训练环境租约上限。部分批次的输出上限等推理配置有差异。</li><li>页面公开模型结果、候选轨迹与汇总指标。该页为一次结果快照，重新构建后更新。</li></ul><details><summary>查看数据身份</summary><p id="provenance" style="overflow-wrap:anywhere;margin-top:12px"></p></details></section>
+<section class="panel"><h2>数据口径与复现</h2><ul class="note-list"><li>每个模型／Track 配置采用最新授权尝试。A8、B6、B12 分开保留；B12 覆盖 10 个模型。GLM B6 与 Flash A 的旧失败尝试，以及未完成的 GLM B12，单独排除。</li><li>本批为 host_cli preview，不属于正式 leaderboard；每种配置只有一次运行，未估计训练种子方差。</li><li>A 是研究墙钟上限；B 是训练环境租约上限。部分批次的输出上限等推理配置有差异。</li><li>TPU v5e · A 6 h：同一 lm-pretrain 任务（JAX 训练镜像），1 台 4 × Cloud TPU v5e，每模型一次运行。7 个模型（Astra、Opus 5、Fable 5.1、Sonnet 5、DeepSeek Pro、DeepSeek Flash 4.1、GLM 5.3）走 opencode 容器 + 推理网关；Sol 6.1、Luna 6、Terra 经 Codex（ChatGPT Pro）、Kimi K3 经 Cursor 以 host_cli 运行，工具不同，不直接可比。Sol 6.1、Luna 6 与 DeepSeek Flash 4.1 是比 H200 批次更新的版本。因中转余额或配额中止的尝试已排除。</li><li>页面公开模型结果、候选轨迹与汇总指标。该页为一次结果快照，重新构建后更新。</li></ul><details><summary>查看数据身份</summary><p id="provenance" style="overflow-wrap:anywhere;margin-top:12px"></p></details></section>
 <footer><span>nGrove · RSI as meta-learning</span><a href="https://github.com/xiehuanyi/ngrove-viz/blob/main/tools/build_rsi.py">构建脚本</a><a href="https://github.com/xiehuanyi/ngrove-viz/blob/main/tools/rsi-template.html">页面模板</a><a href="https://arxiv.org/abs/2303.11366">Reflexion</a><a href="https://arxiv.org/abs/2210.14215">Algorithm Distillation</a></footer>
 </main>
 <div id="graph-tooltip" class="graph-tooltip" role="tooltip" hidden></div>
@@ -85,7 +85,7 @@ function applyLanguage(){
  staticAttributes.forEach(({node,attr,source})=>node.setAttribute(attr,t(source)));
  document.querySelectorAll('[data-lang]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.lang===language)));
  $('#swap-axes').dataset.swapLabel=t('交换横纵轴');
- $('#stamp').textContent=t('数据快照：{time} · lm-pretrain · 单卡 H200',{time:D.generated_at.replace('T',' ').replace('+00:00',' UTC')});
+ $('#stamp').textContent=t('数据快照：{time} · lm-pretrain · H200 与 TPU v5e',{time:D.generated_at.replace('T',' ').replace('+00:00',' UTC')});
  $('#provenance').textContent=t('Core: {revision} · 源快照 SHA256: {hash}',{revision:D.core_revision,hash:D.source_sha256});
 }
 document.querySelectorAll('[data-lang]').forEach(button=>button.addEventListener('click',()=>{
@@ -95,9 +95,11 @@ document.querySelectorAll('[data-lang]').forEach(button=>button.addEventListener
  applyLanguage();fillAxes();render();
 }));
 const defs={
-'claude-fable-5-1':['Fable 5.1','#a43d75'],'claude-opus-5':['Opus 5','#d98030'],'gpt-6-astra':['Astra','#287dc1'],'kimi-k3':['Kimi K3','#1c9681'],'deepseek-v4-flash':['DeepSeek Flash','#9268c0'],'glm-5.3':['GLM 5.3','#73853d'],'claude-sonnet-5':['Sonnet 5','#c45749'],'gpt-5.6-sol':['Sol','#4e97b3'],'deepseek-v4-pro':['DeepSeek Pro','#5c549e'],'gpt-5.6-terra':['Terra','#67718a'],'gpt-5.6-luna':['Luna','#a17d4f']};
+'claude-fable-5-1':['Fable 5.1','#a43d75'],'claude-opus-5':['Opus 5','#d98030'],'gpt-6-astra':['Astra','#287dc1'],'kimi-k3':['Kimi K3','#1c9681'],'deepseek-v4-flash':['DeepSeek Flash','#9268c0'],'glm-5.3':['GLM 5.3','#73853d'],'claude-sonnet-5':['Sonnet 5','#c45749'],'gpt-5.6-sol':['Sol','#4e97b3'],'deepseek-v4-pro':['DeepSeek Pro','#5c549e'],'gpt-5.6-terra':['Terra','#67718a'],'gpt-5.6-luna':['Luna','#a17d4f'],'gpt-6.1-sol':['Sol 6.1','#2f6f8a'],'gpt-6-luna':['Luna 6','#8f9a2a'],'deepseek-v4.1-flash':['DeepSeek Flash 4.1','#6c45a3']};
 const models=Object.keys(defs).filter(m=>D.rows.some(r=>r.model===m)), visible=new Set(models);let track='A';
-const lane=r=>r.track==='A'?'A':(r.max_leases===12||r.track_config==='preview-b-12x1h'?'B12':'B6');
+const lane=r=>r.comparison_key?.runtime_profile==='tpu-v5e-x4'?'TPU':r.track==='A'?'A':(r.max_leases===12||r.track_config==='preview-b-12x1h'?'B12':'B6');
+const laneLabel=r=>lane(r)==='TPU'?'A · TPU v5e':lane(r);
+const harness=r=>r.runner?` <span class="badge">${esc(r.runner==='container'?r.inference_source:r.agent_tool.split(' ')[0]+' · host_cli')}</span>`:'';
 const fmt=(n,d=4)=>n==null?'—':Number(n).toFixed(d), esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 $('#model-count').textContent=models.length;$('#complete-count').textContent=`${D.rows.filter(r=>r.test_nll!=null).length} / ${D.rows.length}`;
 models.forEach(m=>{const b=document.createElement('button');b.className='chip';b.setAttribute('aria-pressed','true');b.innerHTML=`<span class="dot" style="background:${defs[m][1]}"></span>${esc(defs[m][0])}`;b.dataset.model=m;b.addEventListener('click',()=>{visible.has(m)?visible.delete(m):visible.add(m);render()});$('#legend').append(b)});
@@ -188,8 +190,8 @@ function showTooltip(point,event){
   const budget=`${pretty(r.budget_hours,0)} h ${t(r.track==='A'?'研究墙钟上限':'租约总上限')}`;
   const choice=axisChoices[$('#plot-view').value],set=metricSets[$('#plot-view').value];
   const axes=`${t('横轴')} ${esc(t(set[choice.x].label))}: ${pretty(point.x,set[choice.x].integer?0:6)}<br>${t('纵轴')} ${esc(t(set[choice.y].label))}: ${pretty(point.y,set[choice.y].integer?0:6)}`;
-  tooltip.innerHTML=`<div class="tooltip-title"><span style="color:${defs[r.model][1]}">●</span> ${esc(defs[r.model][0])} · Track ${lane(r)}</div><div class="tooltip-subtitle">${esc(stage)} · ${source}${c?`<br>${t('候选 ID')} ${esc(c.candidate_id)}`:''}</div><dl class="tooltip-metrics">${entries.map(([label,value,cls])=>`<div class="${cls||''}"><dt>${esc(t(label))}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl><div class="tooltip-footer">${axes}<br>${t('样本数')} ${pretty(v.task_count,0)} · ${esc(budget)}<br>${t(c?'ANALYSIS 为研究结束后评估。':'TEST 仅评估最终候选。')}${t('PPL = exp(NLL)。')}</div>`;
-  $('#point-detail').textContent=`${defs[r.model][0]} · Track ${lane(r)} · ${stage} · ${source} Score ${pretty(v.score,4)} · NLL ${pretty(c?c.nll:r.test_nll,6)} · ${pretty(v.seconds_per_task,6)} s/task (${pretty(v.ms,4)} ms/task)`;
+  tooltip.innerHTML=`<div class="tooltip-title"><span style="color:${defs[r.model][1]}">●</span> ${esc(defs[r.model][0])} · Track ${laneLabel(r)}</div><div class="tooltip-subtitle">${esc(stage)} · ${source}${c?`<br>${t('候选 ID')} ${esc(c.candidate_id)}`:''}</div><dl class="tooltip-metrics">${entries.map(([label,value,cls])=>`<div class="${cls||''}"><dt>${esc(t(label))}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl><div class="tooltip-footer">${axes}<br>${t('样本数')} ${pretty(v.task_count,0)} · ${esc(budget)}<br>${t(c?'ANALYSIS 为研究结束后评估。':'TEST 仅评估最终候选。')}${t('PPL = exp(NLL)。')}</div>`;
+  $('#point-detail').textContent=`${defs[r.model][0]} · Track ${laneLabel(r)} · ${stage} · ${source} Score ${pretty(v.score,4)} · NLL ${pretty(c?c.nll:r.test_nll,6)} · ${pretty(v.seconds_per_task,6)} s/task (${pretty(v.ms,4)} ms/task)`;
  }
  tooltip.hidden=false;
  const anchor=point.circle.getBoundingClientRect(),x=event?.clientX??(anchor.left+anchor.width/2),y=event?.clientY??(anchor.top+anchor.height/2);
@@ -294,7 +296,7 @@ function drawPlot(rows){
  });
  points.forEach(p=>{
   const r=p.row,stage=p.candidate?` · ${t('提交 {index}',{index:p.candidate.index})}${p.candidate.final?' · '+t('最终候选'):''}`:' · '+t('最终结果');
-  const label=`${defs[r.model][0]} · Track ${lane(r)}${stage} ｜ ${xm.label}：${fmt(p.x,xm.integer?0:6)} ｜ ${ym.label}：${fmt(p.y,ym.integer?0:6)}`;
+  const label=`${defs[r.model][0]} · Track ${laneLabel(r)}${stage} ｜ ${xm.label}：${fmt(p.x,xm.integer?0:6)} ｜ ${ym.label}：${fmt(p.y,ym.integer?0:6)}`;
   const major=!p.candidate||p.candidate.final;
   if(major)el(svg,'circle',{cx:sx(p.x),cy:sy(p.y),r:13,fill:defs[r.model][1],opacity:.13,'pointer-events':'none'});
   const circle=el(svg,'circle',{cx:sx(p.x),cy:sy(p.y),r:major?7:4.6,fill:defs[r.model][1],stroke:'white','stroke-width':2,tabindex:0,class:'chart-point','aria-label':label,'data-model-id':r.model,'data-x':p.x,'data-y':p.y});
@@ -334,12 +336,12 @@ function render(){
  }).join('')||`<tr><td colspan="6">${t('请选择模型。')}</td></tr>`;
  document.querySelectorAll('[data-track]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.track===track)));
  document.querySelectorAll('[data-model]').forEach(b=>b.setAttribute('aria-pressed',String(visible.has(b.dataset.model))));
- $('#track-desc').textContent=t(track==='A'?'最多 8 小时研究墙钟；可多次实验和开租约。':track==='B12'?'最多 12 个训练租约，每次最多 1 小时；GLM 5.3 未完成，已排除。':'最多 6 个训练租约，每次最多 1 小时。');
- $('#table-title').textContent=t('Track {track} · 最终结果',{track});
+ $('#track-desc').textContent=t(track==='TPU'?'4 × Cloud TPU v5e，最多 6 小时研究墙钟。7 个模型走 opencode 容器与推理网关；标 host_cli 的 4 个经 Codex/Cursor 订阅运行，不直接可比。':track==='A'?'最多 8 小时研究墙钟；可多次实验和开租约。':track==='B12'?'最多 12 个训练租约，每次最多 1 小时；GLM 5.3 未完成，已排除。':'最多 6 个训练租约，每次最多 1 小时。');
+ $('#table-title').textContent=t('Track {track} · 最终结果',{track:track==='TPU'?'A · TPU v5e':track});
  const rows=D.rows.filter(r=>lane(r)===track&&visible.has(r.model)).sort((a,b)=>(a.test_nll??Infinity)-(b.test_nll??Infinity));
  drawPlot(rows);
- $('#results').innerHTML=rows.length?rows.map(r=>`<tr><td><span style="color:${defs[r.model][1]}">●</span> ${esc(defs[r.model][0])}</td><td class="num">${fmt(r.test_nll)}</td><td class="num">${fmt(r.score,2)}</td><td class="num">${fmt(r.seconds_per_task,6)}</td><td class="num">${fmt(r.lease_hours,2)}</td><td>${r.candidates}</td><td class="num">${fmt(r.first_analysis,3)} → ${fmt(r.final_analysis,3)}</td></tr>`).join(''):`<tr><td colspan="7">${t('请选择模型。')}</td></tr>`;
- $('#pairs').innerHTML=models.filter(m=>visible.has(m)).map(m=>{const a=D.rows.find(r=>r.model===m&&r.track==='A'),b=D.rows.find(r=>r.model===m&&lane(r)==='B6'),diff=a?.test_nll!=null&&b?.test_nll!=null?b.test_nll-a.test_nll:null;return `<tr><td>${esc(defs[m][0])}</td><td class="num">${fmt(a?.test_nll)}</td><td class="num">${fmt(b?.test_nll)}</td><td class="num" style="color:${diff<0?'var(--green)':'var(--orange)'}">${diff==null?'—':(diff>0?'+':'')+fmt(diff)}</td><td>${diff==null?t('未完成'):diff<0?'B':diff>0?'A':t('相同')}</td></tr>`}).join('')||`<tr><td colspan="5">${t('请选择模型。')}</td></tr>`;
+ $('#results').innerHTML=rows.length?rows.map(r=>`<tr><td><span style="color:${defs[r.model][1]}">●</span> ${esc(defs[r.model][0])}${harness(r)}</td><td class="num">${fmt(r.test_nll)}</td><td class="num">${fmt(r.score,2)}</td><td class="num">${fmt(r.seconds_per_task,6)}</td><td class="num">${fmt(r.lease_hours,2)}</td><td>${r.candidates}</td><td class="num">${fmt(r.first_analysis,3)} → ${fmt(r.final_analysis,3)}</td></tr>`).join(''):`<tr><td colspan="7">${t('请选择模型。')}</td></tr>`;
+ $('#pairs').innerHTML=models.filter(m=>visible.has(m)&&D.rows.some(r=>r.model===m&&lane(r)!=='TPU')).map(m=>{const a=D.rows.find(r=>r.model===m&&lane(r)==='A'),b=D.rows.find(r=>r.model===m&&lane(r)==='B6'),diff=a?.test_nll!=null&&b?.test_nll!=null?b.test_nll-a.test_nll:null;return `<tr><td>${esc(defs[m][0])}</td><td class="num">${fmt(a?.test_nll)}</td><td class="num">${fmt(b?.test_nll)}</td><td class="num" style="color:${diff<0?'var(--green)':'var(--orange)'}">${diff==null?'—':(diff>0?'+':'')+fmt(diff)}</td><td>${diff==null?t('未完成'):diff<0?'B':diff>0?'A':t('相同')}</td></tr>`}).join('')||`<tr><td colspan="5">${t('请选择模型。')}</td></tr>`;
 }
 applyLanguage();
 fillAxes();

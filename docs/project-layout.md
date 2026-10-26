@@ -3,6 +3,7 @@
 | Path | Purpose |
 | --- | --- |
 | `tools/build_rsi.py` | Standard-library exporter and static HTML builder |
+| `tools/import_tpu_episodes.py` | Replaces the `tpu-a-6h` lane in `rsi/data.json` from archived TPU v5e episodes |
 | `tools/rsi-template.html` | Dashboard HTML, CSS, JavaScript, known model definitions, and campaign-specific narrative |
 | `tools/translations.json` | Embedded Chinese/English UI translations |
 | `rsi/data.json` | Previously published aggregate data used to reproduce the dashboard |

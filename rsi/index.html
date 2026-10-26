@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="nGrove H200 preview runs: compare models, postmortem candidate trajectories, and RSI as meta-learning.">
+<meta name="description" content="nGrove H200 and Cloud TPU v5e preview runs: compare models, postmortem candidate trajectories, and RSI as meta-learning.">
 <title>nGrove · RSI / Meta-learning</title>
 <style>
 :root{color-scheme:light;--bg:#f5f6f9;--paper:#fff;--ink:#202337;--muted:#656c80;--line:#e5e7ef;--accent:#6154c7;--soft:#eeebff;--green:#178172;--orange:#bc7651}
@@ -31,10 +31,10 @@
 <body>
 <header><nav class="nav" aria-label="页面导航"><a class="brand" href="https://github.com/liangyuwang/nGrove">nGrove</a><a class="active" href="#" aria-current="page">RSI 分析</a><a href="#table-title">最新实验结果</a><div class="grow"></div><a href="https://github.com/xiehuanyi/ngrove-viz/tree/main/tools">可视化脚本 ↗</a><div class="seg language-switch" role="group" aria-label="页面语言"><button type="button" data-lang="zh" lang="zh-CN" aria-pressed="true">中文</button><button type="button" data-lang="en" lang="en" aria-pressed="false">English</button></div></nav></header>
 <main class="wrap">
-<div class="intro"><div class="eyebrow">Research notes / H200 experiments</div><h1>从实验中学习，模型做得如何？</h1><p class="muted">把 RSI 看作 meta-learning：内层训练语言模型，外层根据实验反馈调整方法。一起看最终质量、候选轨迹，以及每次改进花掉的预算。</p><div class="stamp" id="stamp"></div></div>
-<section class="stats" aria-label="实验概况"><div class="stat"><div class="value" id="model-count"></div><div class="label">研究模型</div></div><div class="stat"><div class="value" id="complete-count"></div><div class="label">已完成实验</div></div><div class="stat"><div class="value" style="font-size:18px">A: 8 h<br>B: 6 / 12 × 1 h</div><div class="label">Track A / Track B 预算上限</div></div><div class="stat"><div class="value">1 × H200</div><div class="label">相同任务、数据及评估器</div></div></section>
+<div class="intro"><div class="eyebrow">Research notes / H200 &amp; TPU experiments</div><h1>从实验中学习，模型做得如何？</h1><p class="muted">把 RSI 看作 meta-learning：内层训练语言模型，外层根据实验反馈调整方法。一起看最终质量、候选轨迹，以及每次改进花掉的预算。</p><div class="stamp" id="stamp"></div></div>
+<section class="stats" aria-label="实验概况"><div class="stat"><div class="value" id="model-count"></div><div class="label">研究模型</div></div><div class="stat"><div class="value" id="complete-count"></div><div class="label">已完成实验</div></div><div class="stat"><div class="value" style="font-size:18px">A: 8 h · B: 6 / 12 × 1 h<br>TPU A: 6 h</div><div class="label">Track A / Track B 预算上限</div></div><div class="stat"><div class="value" style="font-size:18px">1 × H200<br>4 × TPU v5e</div><div class="label">两种硬件分开比较</div></div></section>
 <div class="notice"><strong>如何解读：</strong>A 与 B 都允许自我改进，预算规则不同。这里展示观察结果，尚无同预算 RSI-off 对照。ANALYSIS 分数在研究结束后计算，并不是 Agent 当时获得的反馈。</div>
-<section class="panel" aria-labelledby="filter-title"><h2 id="filter-title">选择比较范围</h2><div class="filters"><div class="seg" aria-label="选择 Track"><button data-track="A" aria-pressed="true">Track A · 8 h</button><button data-track="B6" aria-pressed="false">Track B · 6</button><button data-track="B12" aria-pressed="false">Track B · 12</button></div><span id="track-desc" class="hint"></span><span class="grow"></span><button id="all" class="smallbutton">全部模型</button><button id="leading" class="smallbutton">聚焦主要模型</button></div><div class="legend" id="legend" aria-label="筛选模型"></div><p class="caption">点击模型名称可隐藏或恢复；图表和结果表会同步更新。默认显示全部模型。</p></section>
+<section class="panel" aria-labelledby="filter-title"><h2 id="filter-title">选择比较范围</h2><div class="filters"><div class="seg" aria-label="选择 Track"><button data-track="A" aria-pressed="true">Track A · 8 h</button><button data-track="B6" aria-pressed="false">Track B · 6</button><button data-track="B12" aria-pressed="false">Track B · 12</button><button data-track="TPU" aria-pressed="false">TPU v5e · A 6 h</button></div><span id="track-desc" class="hint"></span><span class="grow"></span><button id="all" class="smallbutton">全部模型</button><button id="leading" class="smallbutton">聚焦主要模型</button></div><div class="legend" id="legend" aria-label="筛选模型"></div><p class="caption">点击模型名称可隐藏或恢复；图表和结果表会同步更新。默认显示全部模型。</p></section>
 <section class="panel plot-panel" aria-labelledby="plot-title">
 <h2 id="plot-title">自定义比较图</h2><p class="hint">横纵轴可选 Score、NLL、PPL、推理耗时、吞吐、预算等指标。悬停点附近即可查看详细信息。</p>
 <div class="plot-presets" aria-label="常用指标组合"><button type="button" class="smallbutton" data-preset="score-time">Score × 时间</button><button type="button" class="smallbutton" data-preset="nll-time">NLL × 时间</button><button type="button" class="smallbutton" data-preset="score-cost">Score × s/task</button></div>
@@ -52,7 +52,7 @@
 <section class="panel"><h2>B6 → B12：增加租约后的结果</h2><p class="hint">独立新运行，每种配置一次；差值包含训练量、策略与随机性变化，不是纯预算因果效应。</p><div class="tablewrap"><table><thead><tr><th>模型</th><th>B6 · TEST NLL</th><th>B12 · TEST NLL</th><th>B12 − B6</th><th>B12 · s/task</th><th>B12 · 租约小时</th></tr></thead><tbody id="budget-pairs"></tbody></table></div><p class="caption">10 个模型完成了 B12；GLM 5.3 的 B12 在第 11 个租约后 Agent 退出、没有 TEST，已排除。负值表示 B12 的 NLL 更低。</p></section>
 <section class="panel"><h2>同一模型：A8 与 B6</h2><p class="hint">这是一组描述性配对，不合并成同一预算下的排名。</p><div class="tablewrap"><table><thead><tr><th scope="col">模型</th><th scope="col">A · TEST NLL</th><th scope="col">B6 · TEST NLL</th><th scope="col">B6 − A</th><th scope="col">较低 NLL</th></tr></thead><tbody id="pairs"></tbody></table></div><p class="caption">负值表示本次 B 的 NLL 更低。结果同时受初始配方、实际训练量、推理配置和随机性影响，差值不等于 RSI 增益。</p></section>
 <section class="panel"><div class="eyebrow">Reading the evidence</div><h2 style="margin-top:8px">三个值得保留的判断</h2><div class="evidence"><article><div class="tag">01 / 方法改进</div><h3>Fable / Opus：完整的反馈闭环</h3><p>A 组通过测量瓶颈改善吞吐，最终加速也包含模型配置变化。Opus 还调整不稳定的训练策略，并放弃实测无收益的权重平均。B6 组两者只差 0.00031 NLL，单次实验不足以区分优劣。</p></article><article><div class="tag">02 / 诊断与取舍</div><h3>Astra / Kimi：不同的适应能力</h3><p>Astra 比较上下文长度与校准方案，在 B6 组获得最低的推理耗时点估计。Kimi 在更换验证样本后，把旧、新候选放到相同样本上重测，避免把测量变化误判为进步。</p></article><article><div class="tag">03 / 归因边界</div><h3>首末涨幅需要结合起点</h3><p>早期保险候选、错误修复、更多梯度训练和方法更新，都可能拉大首末差值。Flash B 到第 5 租约才提交首候选，不能与从第 1 租约开始提交的曲线直接比较涨幅。</p></article></div><details><summary>其余模型的过程证据</summary><ul class="note-list"><li>DeepSeek Flash：B 的高吞吐配方与持续训练获得优秀终点；A 的退火与低学习率续训也改善了自评与候选结果。</li><li>GLM：通过 profiling、CUDA graphs 与位置表示调整提高吞吐；实现收益没有全部转化成最优质量。</li><li>Sonnet：B 修复逐元素输出检查瓶颈，本地 1000 样本耗时约 25 s → 3.4 s；A 的自评未充分覆盖最终表现。</li><li>Sol：B 候选稳定改善，主要沿相同配方续训；方法层改进的独立贡献尚未识别。</li><li>DeepSeek Pro：两轨初始配方、搜索成本和最终结果差异较大。</li><li>Terra / Luna：错误修复、验证覆盖和预算分配仍限制结果；大幅下降不能自动归因于更强元学习。</li></ul></details></section>
-<section class="panel"><h2>数据口径与复现</h2><ul class="note-list"><li>每个模型／Track 配置采用最新授权尝试。A8、B6、B12 分开保留；B12 覆盖 10 个模型。GLM B6 与 Flash A 的旧失败尝试，以及未完成的 GLM B12，单独排除。</li><li>本批为 host_cli preview，不属于正式 leaderboard；每种配置只有一次运行，未估计训练种子方差。</li><li>A 是研究墙钟上限；B 是训练环境租约上限。部分批次的输出上限等推理配置有差异。</li><li>页面公开模型结果、候选轨迹与汇总指标。该页为一次结果快照，重新构建后更新。</li></ul><details><summary>查看数据身份</summary><p id="provenance" style="overflow-wrap:anywhere;margin-top:12px"></p></details></section>
+<section class="panel"><h2>数据口径与复现</h2><ul class="note-list"><li>每个模型／Track 配置采用最新授权尝试。A8、B6、B12 分开保留；B12 覆盖 10 个模型。GLM B6 与 Flash A 的旧失败尝试，以及未完成的 GLM B12，单独排除。</li><li>本批为 host_cli preview，不属于正式 leaderboard；每种配置只有一次运行，未估计训练种子方差。</li><li>A 是研究墙钟上限；B 是训练环境租约上限。部分批次的输出上限等推理配置有差异。</li><li>TPU v5e · A 6 h：同一 lm-pretrain 任务（JAX 训练镜像），1 台 4 × Cloud TPU v5e，每模型一次运行。7 个模型（Astra、Opus 5、Fable 5.1、Sonnet 5、DeepSeek Pro、DeepSeek Flash 4.1、GLM 5.3）走 opencode 容器 + 推理网关；Sol 6.1、Luna 6、Terra 经 Codex（ChatGPT Pro）、Kimi K3 经 Cursor 以 host_cli 运行，工具不同，不直接可比。Sol 6.1、Luna 6 与 DeepSeek Flash 4.1 是比 H200 批次更新的版本。因中转余额或配额中止的尝试已排除。</li><li>页面公开模型结果、候选轨迹与汇总指标。该页为一次结果快照，重新构建后更新。</li></ul><details><summary>查看数据身份</summary><p id="provenance" style="overflow-wrap:anywhere;margin-top:12px"></p></details></section>
 <footer><span>nGrove · RSI as meta-learning</span><a href="https://github.com/xiehuanyi/ngrove-viz/blob/main/tools/build_rsi.py">构建脚本</a><a href="https://github.com/xiehuanyi/ngrove-viz/blob/main/tools/rsi-template.html">页面模板</a><a href="https://arxiv.org/abs/2303.11366">Reflexion</a><a href="https://arxiv.org/abs/2210.14215">Algorithm Distillation</a></footer>
 </main>
 <div id="graph-tooltip" class="graph-tooltip" role="tooltip" hidden></div>
@@ -3018,10 +3018,902 @@
       "output_tokens": 19973,
       "total_tokens": 5241646,
       "agent_turns": 71
+    },
+    {
+      "model": "gpt-6-astra",
+      "track": "A",
+      "track_config": "tpu-a-6h",
+      "comparison_key": {
+        "challenge_id": "lm-pretrain",
+        "runtime_profile": "tpu-v5e-x4",
+        "track": "A",
+        "track_config": "tpu-a-6h"
+      },
+      "challenge_manifest_sha256": null,
+      "task_manifest_sha256": "dc9120c54e75b721c7a483733f5828fb4793c5fbaf7d536511da9942d0a9278f",
+      "max_leases": null,
+      "status": "finalized",
+      "outcome": "success",
+      "test_nll": 2.9973181020294435,
+      "score": 72.31090648014904,
+      "seconds_per_task": 0.004663103951660474,
+      "ms": 4.663103951660474,
+      "ppl": 20.031741731327603,
+      "evaluation_seconds": 9.550036893000652,
+      "tasks_per_second": 214.44943333161427,
+      "input_tokens_per_second": 143989.39139259577,
+      "task_count": 2048,
+      "budget_hours": 6.0,
+      "lease_hours": 5.803705521666666,
+      "research_hours": 5.811462671388889,
+      "leases": 1,
+      "candidates": 1,
+      "first_analysis": 3.003061386512467,
+      "final_analysis": 3.003061386512467,
+      "reasoning_effort": "xhigh",
+      "points": [
+        {
+          "index": 1,
+          "candidate_id": "7d5972faef81",
+          "lease": "lease-0001",
+          "hours": 5.803705521666666,
+          "research_hours": 5.8088016980555555,
+          "nll": 3.003061386512467,
+          "score": 72.25785026931379,
+          "ppl": 20.147120732844712,
+          "seconds_per_task": 0.005009437762696578,
+          "ms": 5.009437762696578,
+          "evaluation_seconds": 10.259328538002592,
+          "tasks_per_second": 199.62320072057358,
+          "input_tokens_per_second": 134034.50283382012,
+          "task_count": 2048,
+          "final": true
+        }
+      ],
+      "reasoning_tokens": null,
+      "output_tokens": 46138,
+      "total_tokens": 5937385,
+      "agent_turns": null,
+      "model_calls": 84,
+      "runtime": "1 host × 4 Google Cloud TPU v5e (v5litepod-4)",
+      "runner": "container",
+      "agent_tool": "OpenCode 1.18.27",
+      "inference_source": "OhMyGPT relay",
+      "core_revision": "ab09cdfe7b73",
+      "comparable_harness": true
+    },
+    {
+      "model": "claude-fable-5-1",
+      "track": "A",
+      "track_config": "tpu-a-6h",
+      "comparison_key": {
+        "challenge_id": "lm-pretrain",
+        "runtime_profile": "tpu-v5e-x4",
+        "track": "A",
+        "track_config": "tpu-a-6h"
+      },
+      "challenge_manifest_sha256": null,
+      "task_manifest_sha256": "dc9120c54e75b721c7a483733f5828fb4793c5fbaf7d536511da9942d0a9278f",
+      "max_leases": null,
+      "status": "finalized",
+      "outcome": "success",
+      "test_nll": 3.1301444047802782,
+      "score": 71.08386290533672,
+      "seconds_per_task": 0.009393052338868557,
+      "ms": 9.393052338868557,
+      "ppl": 22.877282892934787,
+      "evaluation_seconds": 19.236971190002805,
+      "tasks_per_second": 106.46166591257973,
+      "input_tokens_per_second": 71482.35480617775,
+      "task_count": 2048,
+      "budget_hours": 6.0,
+      "lease_hours": 5.105027506666667,
+      "research_hours": 5.253220802222222,
+      "leases": 4,
+      "candidates": 2,
+      "first_analysis": 3.394363107643842,
+      "final_analysis": 3.1820861782830177,
+      "reasoning_effort": "xhigh",
+      "points": [
+        {
+          "index": 1,
+          "candidate_id": "a4f82ca099e4",
+          "lease": "lease-0003",
+          "hours": 2.717702276111111,
+          "research_hours": 2.855008806111111,
+          "nll": 3.394363107643842,
+          "score": 68.64302208556208,
+          "ppl": 29.795670795641723,
+          "seconds_per_task": 0.009410975394532173,
+          "ms": 9.410975394532173,
+          "evaluation_seconds": 19.27367760800189,
+          "tasks_per_second": 106.25891133250708,
+          "input_tokens_per_second": 71346.21777782022,
+          "task_count": 2048,
+          "final": false
+        },
+        {
+          "index": 2,
+          "candidate_id": "8805e84f128a",
+          "lease": "lease-0004",
+          "hours": 5.105027506666667,
+          "research_hours": 5.250294178333333,
+          "nll": 3.1820861782830177,
+          "score": 70.60402707372096,
+          "ppl": 24.096971730925922,
+          "seconds_per_task": 0.00938406289111171,
+          "ms": 9.38406289111171,
+          "evaluation_seconds": 19.218560800996784,
+          "tasks_per_second": 106.56365069197997,
+          "input_tokens_per_second": 71550.8312114963,
+          "task_count": 2048,
+          "final": true
+        }
+      ],
+      "reasoning_tokens": null,
+      "output_tokens": 111202,
+      "total_tokens": 5909086,
+      "agent_turns": null,
+      "model_calls": 92,
+      "runtime": "1 host × 4 Google Cloud TPU v5e (v5litepod-4)",
+      "runner": "container",
+      "agent_tool": "OpenCode 1.18.27",
+      "inference_source": "OhMyGPT relay",
+      "core_revision": "ab09cdfe7b73",
+      "comparable_harness": true
+    },
+    {
+      "model": "claude-opus-5",
+      "track": "A",
+      "track_config": "tpu-a-6h",
+      "comparison_key": {
+        "challenge_id": "lm-pretrain",
+        "runtime_profile": "tpu-v5e-x4",
+        "track": "A",
+        "track_config": "tpu-a-6h"
+      },
+      "challenge_manifest_sha256": null,
+      "task_manifest_sha256": "dc9120c54e75b721c7a483733f5828fb4793c5fbaf7d536511da9942d0a9278f",
+      "max_leases": null,
+      "status": "finalized",
+      "outcome": "success",
+      "test_nll": 3.111818235894048,
+      "score": 71.25315925189662,
+      "seconds_per_task": 0.03813400717040949,
+      "ms": 38.13400717040949,
+      "ppl": 22.461848232712377,
+      "evaluation_seconds": 78.09844668499863,
+      "tasks_per_second": 26.22331284334475,
+      "input_tokens_per_second": 17607.31561725329,
+      "task_count": 2048,
+      "budget_hours": 6.0,
+      "lease_hours": 5.014373109722222,
+      "research_hours": 5.036185221111111,
+      "leases": 2,
+      "candidates": 2,
+      "first_analysis": 3.675867136464399,
+      "final_analysis": 3.1569102219651564,
+      "reasoning_effort": "xhigh",
+      "points": [
+        {
+          "index": 1,
+          "candidate_id": "0855e6db2e84",
+          "lease": "lease-0001",
+          "hours": 1.7456325408333333,
+          "research_hours": 1.7532492655555554,
+          "nll": 3.675867136464399,
+          "score": 66.04250018067997,
+          "ppl": 39.482879061549234,
+          "seconds_per_task": 0.038349210557129254,
+          "ms": 38.349210557129254,
+          "evaluation_seconds": 78.53918322100071,
+          "tasks_per_second": 26.076156079152884,
+          "input_tokens_per_second": 17508.509047396215,
+          "task_count": 2048,
+          "final": false
+        },
+        {
+          "index": 2,
+          "candidate_id": "cf3e8ff826ee",
+          "lease": "lease-0002",
+          "hours": 5.014373109722222,
+          "research_hours": 5.028285693611111,
+          "nll": 3.1569102219651564,
+          "score": 70.8366014569554,
+          "ppl": 23.49788041474738,
+          "seconds_per_task": 0.03817446413574288,
+          "ms": 38.17446413574288,
+          "evaluation_seconds": 78.18130255000142,
+          "tasks_per_second": 26.195521604288786,
+          "input_tokens_per_second": 17588.65553717965,
+          "task_count": 2048,
+          "final": true
+        }
+      ],
+      "reasoning_tokens": null,
+      "output_tokens": 144394,
+      "total_tokens": 13370127,
+      "agent_turns": null,
+      "model_calls": 170,
+      "runtime": "1 host × 4 Google Cloud TPU v5e (v5litepod-4)",
+      "runner": "container",
+      "agent_tool": "OpenCode 1.18.27",
+      "inference_source": "OhMyGPT relay",
+      "core_revision": "ab09cdfe7b73",
+      "comparable_harness": true
+    },
+    {
+      "model": "claude-sonnet-5",
+      "track": "A",
+      "track_config": "tpu-a-6h",
+      "comparison_key": {
+        "challenge_id": "lm-pretrain",
+        "runtime_profile": "tpu-v5e-x4",
+        "track": "A",
+        "track_config": "tpu-a-6h"
+      },
+      "challenge_manifest_sha256": null,
+      "task_manifest_sha256": "dc9120c54e75b721c7a483733f5828fb4793c5fbaf7d536511da9942d0a9278f",
+      "max_leases": null,
+      "status": "finalized",
+      "outcome": "success",
+      "test_nll": 3.227383699688353,
+      "score": 70.18557055235254,
+      "seconds_per_task": 0.08131183476074177,
+      "ms": 81.31183476074177,
+      "ppl": 25.213604241118,
+      "evaluation_seconds": 166.52663758999915,
+      "tasks_per_second": 12.298332745073054,
+      "input_tokens_per_second": 8257.56179251999,
+      "task_count": 2048,
+      "budget_hours": 6.0,
+      "lease_hours": 4.655325353333334,
+      "research_hours": 5.077890966388889,
+      "leases": 15,
+      "candidates": 1,
+      "first_analysis": 3.2562913101751456,
+      "final_analysis": 3.2562913101751456,
+      "reasoning_effort": "xhigh",
+      "points": [
+        {
+          "index": 1,
+          "candidate_id": "0e8544204596",
+          "lease": "lease-0015",
+          "hours": 4.655325353055555,
+          "research_hours": 5.075280313055556,
+          "nll": 3.2562913101751456,
+          "score": 69.91852331113306,
+          "ppl": 25.95310641553242,
+          "seconds_per_task": 0.08210068306249951,
+          "ms": 82.10068306249951,
+          "evaluation_seconds": 168.142198911999,
+          "tasks_per_second": 12.180166628318373,
+          "input_tokens_per_second": 8178.220630501517,
+          "task_count": 2048,
+          "final": true
+        }
+      ],
+      "reasoning_tokens": null,
+      "output_tokens": 381209,
+      "total_tokens": 53058924,
+      "agent_turns": null,
+      "model_calls": 367,
+      "runtime": "1 host × 4 Google Cloud TPU v5e (v5litepod-4)",
+      "runner": "container",
+      "agent_tool": "OpenCode 1.18.27",
+      "inference_source": "OhMyGPT relay",
+      "core_revision": "ab09cdfe7b73",
+      "comparable_harness": true
+    },
+    {
+      "model": "deepseek-v4.1-flash",
+      "track": "A",
+      "track_config": "tpu-a-6h",
+      "comparison_key": {
+        "challenge_id": "lm-pretrain",
+        "runtime_profile": "tpu-v5e-x4",
+        "track": "A",
+        "track_config": "tpu-a-6h"
+      },
+      "challenge_manifest_sha256": null,
+      "task_manifest_sha256": "dc9120c54e75b721c7a483733f5828fb4793c5fbaf7d536511da9942d0a9278f",
+      "max_leases": null,
+      "status": "finalized",
+      "outcome": "success",
+      "test_nll": 3.0837569417427075,
+      "score": 71.51238825982821,
+      "seconds_per_task": 0.00577531452392499,
+      "ms": 5.77531452392499,
+      "ppl": 21.840301194590374,
+      "evaluation_seconds": 11.82784414499838,
+      "tasks_per_second": 173.1507428482674,
+      "input_tokens_per_second": 116259.90190118356,
+      "task_count": 2048,
+      "budget_hours": 6.0,
+      "lease_hours": 5.026209412222222,
+      "research_hours": 5.051624198611111,
+      "leases": 4,
+      "candidates": 3,
+      "first_analysis": 3.1743483239007317,
+      "final_analysis": 3.1429251774488796,
+      "reasoning_effort": "max",
+      "points": [
+        {
+          "index": 1,
+          "candidate_id": "a4905b9c49b6",
+          "lease": "lease-0002",
+          "hours": 3.9145458705555556,
+          "research_hours": 3.9187536402777776,
+          "nll": 3.1743483239007317,
+          "score": 70.67550903404043,
+          "ppl": 23.91123241127368,
+          "seconds_per_task": 0.007721366267091412,
+          "ms": 7.721366267091412,
+          "evaluation_seconds": 15.813358115003211,
+          "tasks_per_second": 129.51075825298125,
+          "input_tokens_per_second": 86958.37974448608,
+          "task_count": 2048,
+          "final": false
+        },
+        {
+          "index": 2,
+          "candidate_id": "052644979f25",
+          "lease": "lease-0003",
+          "hours": 4.920561313333333,
+          "research_hours": 4.936632918333333,
+          "nll": 3.1429251774488796,
+          "score": 70.96579468647224,
+          "ppl": 23.17154871149305,
+          "seconds_per_task": 0.007707631273436988,
+          "ms": 7.707631273436988,
+          "evaluation_seconds": 15.785228847998951,
+          "tasks_per_second": 129.74154633555528,
+          "input_tokens_per_second": 87113.3395176794,
+          "task_count": 2048,
+          "final": false
+        },
+        {
+          "index": 3,
+          "candidate_id": "f46b281ac5fc",
+          "lease": "lease-0004",
+          "hours": 5.0262094125,
+          "research_hours": 5.048850509166666,
+          "nll": 3.1429251774488796,
+          "score": 70.96579468647224,
+          "ppl": 23.17154871149305,
+          "seconds_per_task": 0.005727663087890633,
+          "ms": 5.727663087890633,
+          "evaluation_seconds": 11.730254004000017,
+          "tasks_per_second": 174.59127477560435,
+          "input_tokens_per_second": 117227.12905714485,
+          "task_count": 2048,
+          "final": true
+        }
+      ],
+      "reasoning_tokens": null,
+      "output_tokens": 98423,
+      "total_tokens": 4984595,
+      "agent_turns": null,
+      "model_calls": 66,
+      "runtime": "1 host × 4 Google Cloud TPU v5e (v5litepod-4)",
+      "runner": "container",
+      "agent_tool": "OpenCode 1.18.27",
+      "inference_source": "OpenCode Go",
+      "core_revision": "2f0ca1bb8971",
+      "comparable_harness": true
+    },
+    {
+      "model": "deepseek-v4-pro",
+      "track": "A",
+      "track_config": "tpu-a-6h",
+      "comparison_key": {
+        "challenge_id": "lm-pretrain",
+        "runtime_profile": "tpu-v5e-x4",
+        "track": "A",
+        "track_config": "tpu-a-6h"
+      },
+      "challenge_manifest_sha256": null,
+      "task_manifest_sha256": "dc9120c54e75b721c7a483733f5828fb4793c5fbaf7d536511da9942d0a9278f",
+      "max_leases": null,
+      "status": "finalized",
+      "outcome": "success",
+      "test_nll": 3.229918265020913,
+      "score": 70.16215634867564,
+      "seconds_per_task": 0.015610253082520842,
+      "ms": 15.610253082520842,
+      "ppl": 25.277590823168463,
+      "evaluation_seconds": 31.969798313002684,
+      "tasks_per_second": 64.06046043671918,
+      "input_tokens_per_second": 43012.59540447963,
+      "task_count": 2048,
+      "budget_hours": 6.0,
+      "lease_hours": 5.357907291944445,
+      "research_hours": 5.391600420833333,
+      "leases": 3,
+      "candidates": 1,
+      "first_analysis": 3.275160660441388,
+      "final_analysis": 3.275160660441388,
+      "reasoning_effort": "max",
+      "points": [
+        {
+          "index": 1,
+          "candidate_id": "99606547430a",
+          "lease": "lease-0002",
+          "hours": 5.310540333333333,
+          "research_hours": 5.3379998055555555,
+          "nll": 3.275160660441388,
+          "score": 69.7442090787441,
+          "ppl": 26.447474202131822,
+          "seconds_per_task": 0.015860908344725644,
+          "ms": 15.860908344725644,
+          "evaluation_seconds": 32.48314028999812,
+          "tasks_per_second": 63.04809146271488,
+          "input_tokens_per_second": 42332.85291149662,
+          "task_count": 2048,
+          "final": true
+        }
+      ],
+      "reasoning_tokens": null,
+      "output_tokens": 174155,
+      "total_tokens": 29691726,
+      "agent_turns": null,
+      "model_calls": 192,
+      "runtime": "1 host × 4 Google Cloud TPU v5e (v5litepod-4)",
+      "runner": "container",
+      "agent_tool": "OpenCode 1.18.27",
+      "inference_source": "OpenCode Go",
+      "core_revision": "2f0ca1bb8971",
+      "comparable_harness": true
+    },
+    {
+      "model": "glm-5.3",
+      "track": "A",
+      "track_config": "tpu-a-6h",
+      "comparison_key": {
+        "challenge_id": "lm-pretrain",
+        "runtime_profile": "tpu-v5e-x4",
+        "track": "A",
+        "track_config": "tpu-a-6h"
+      },
+      "challenge_manifest_sha256": null,
+      "task_manifest_sha256": "dc9120c54e75b721c7a483733f5828fb4793c5fbaf7d536511da9942d0a9278f",
+      "max_leases": null,
+      "status": "finalized",
+      "outcome": "success",
+      "test_nll": 4.049228102751634,
+      "score": 62.59340790542582,
+      "seconds_per_task": 0.01358856089062499,
+      "ms": 13.58856089062499,
+      "ppl": 57.353169201321116,
+      "evaluation_seconds": 27.82937270399998,
+      "tasks_per_second": 73.59131022402227,
+      "input_tokens_per_second": 49411.96535854195,
+      "task_count": 2048,
+      "budget_hours": 6.0,
+      "lease_hours": 5.038585851388889,
+      "research_hours": 5.1777373452777775,
+      "leases": 2,
+      "candidates": 2,
+      "first_analysis": 4.309749446636728,
+      "final_analysis": 4.117962395178579,
+      "reasoning_effort": "max",
+      "points": [
+        {
+          "index": 1,
+          "candidate_id": "e1dc64b4f220",
+          "lease": "lease-0001",
+          "hours": 4.154339159722222,
+          "research_hours": 4.282267085833333,
+          "nll": 4.309749446636728,
+          "score": 60.18672312616686,
+          "ppl": 74.42183996185751,
+          "seconds_per_task": 0.01328634554589847,
+          "ms": 13.28634554589847,
+          "evaluation_seconds": 27.210435678000067,
+          "tasks_per_second": 75.26524103602759,
+          "input_tokens_per_second": 50535.90527812778,
+          "task_count": 2048,
+          "final": false
+        },
+        {
+          "index": 2,
+          "candidate_id": "2dff15ab850f",
+          "lease": "lease-0002",
+          "hours": 5.038585851111111,
+          "research_hours": 5.1733535377777775,
+          "nll": 4.117962395178579,
+          "score": 61.95844351851545,
+          "ppl": 61.43393656069457,
+          "seconds_per_task": 0.013494059162598049,
+          "ms": 13.494059162598049,
+          "evaluation_seconds": 27.635833165000804,
+          "tasks_per_second": 74.10668561256458,
+          "input_tokens_per_second": 49758.00772098633,
+          "task_count": 2048,
+          "final": true
+        }
+      ],
+      "reasoning_tokens": null,
+      "output_tokens": 169775,
+      "total_tokens": 23626644,
+      "agent_turns": null,
+      "model_calls": 170,
+      "runtime": "1 host × 4 Google Cloud TPU v5e (v5litepod-4)",
+      "runner": "container",
+      "agent_tool": "OpenCode 1.18.27",
+      "inference_source": "OpenCode Go",
+      "core_revision": "2f0ca1bb8971",
+      "comparable_harness": true
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "track": "A",
+      "track_config": "tpu-a-6h",
+      "comparison_key": {
+        "challenge_id": "lm-pretrain",
+        "runtime_profile": "tpu-v5e-x4",
+        "track": "A",
+        "track_config": "tpu-a-6h"
+      },
+      "challenge_manifest_sha256": null,
+      "task_manifest_sha256": "dc9120c54e75b721c7a483733f5828fb4793c5fbaf7d536511da9942d0a9278f",
+      "max_leases": null,
+      "status": "finalized",
+      "outcome": "success",
+      "test_nll": 3.0105985502094694,
+      "score": 72.1882222807665,
+      "seconds_per_task": 0.004903646176270371,
+      "ms": 4.903646176270371,
+      "ppl": 20.299546587546768,
+      "evaluation_seconds": 10.04266736900172,
+      "tasks_per_second": 203.9298848353253,
+      "input_tokens_per_second": 136926.17204911873,
+      "task_count": 2048,
+      "budget_hours": 6.0,
+      "lease_hours": 5.887291061388889,
+      "research_hours": 5.907496647222222,
+      "leases": 5,
+      "candidates": 4,
+      "first_analysis": 4.187581259977456,
+      "final_analysis": 3.020586960185291,
+      "reasoning_effort": "xhigh",
+      "points": [
+        {
+          "index": 1,
+          "candidate_id": "10e19e4d99bb",
+          "lease": "lease-0002",
+          "hours": 0.1424400625,
+          "research_hours": 0.15018055416666667,
+          "nll": 4.187581259977456,
+          "score": 61.31530749072556,
+          "ppl": 65.8632919645761,
+          "seconds_per_task": 0.007805333688475358,
+          "ms": 7.805333688475358,
+          "evaluation_seconds": 15.985323393997533,
+          "tasks_per_second": 128.1175206482855,
+          "input_tokens_per_second": 86022.90777028319,
+          "task_count": 2048,
+          "final": false
+        },
+        {
+          "index": 2,
+          "candidate_id": "05ededa05ac5",
+          "lease": "lease-0003",
+          "hours": 1.3718031494444447,
+          "research_hours": 1.3820737955555555,
+          "nll": 3.527548075747632,
+          "score": 67.41266517590765,
+          "ppl": 34.04040072268395,
+          "seconds_per_task": 0.0087782684897455,
+          "ms": 8.7782684897455,
+          "evaluation_seconds": 17.977893866998784,
+          "tasks_per_second": 113.91768219076107,
+          "input_tokens_per_second": 76488.60373595913,
+          "task_count": 2048,
+          "final": false
+        },
+        {
+          "index": 3,
+          "candidate_id": "8b9dfc817f5d",
+          "lease": "lease-0004",
+          "hours": 5.5143962519444445,
+          "research_hours": 5.526373214722223,
+          "nll": 3.072534797473892,
+          "score": 71.61605793771196,
+          "ppl": 21.596576299494394,
+          "seconds_per_task": 0.011330866537109685,
+          "ms": 11.330866537109685,
+          "evaluation_seconds": 23.205614668000635,
+          "tasks_per_second": 88.2545034596342,
+          "input_tokens_per_second": 59257.38316667813,
+          "task_count": 2048,
+          "final": false
+        },
+        {
+          "index": 4,
+          "candidate_id": "c02cb4234140",
+          "lease": "lease-0005",
+          "hours": 5.887291061388889,
+          "research_hours": 5.905294633333333,
+          "nll": 3.020586960185291,
+          "score": 72.09594978631625,
+          "ppl": 20.50332278710053,
+          "seconds_per_task": 0.004383480780761673,
+          "ms": 4.383480780761673,
+          "evaluation_seconds": 8.977368638999906,
+          "tasks_per_second": 228.12920827412415,
+          "input_tokens_per_second": 153174.50528055723,
+          "task_count": 2048,
+          "final": true
+        }
+      ],
+      "reasoning_tokens": null,
+      "output_tokens": 164396,
+      "total_tokens": 70080261,
+      "agent_turns": null,
+      "model_calls": null,
+      "runtime": "1 host × 4 Google Cloud TPU v5e (v5litepod-4)",
+      "runner": "host_cli",
+      "agent_tool": "Codex CLI 0.159.2",
+      "inference_source": "ChatGPT Pro subscription",
+      "core_revision": "ab09cdfe7b73",
+      "comparable_harness": false
+    },
+    {
+      "model": "gpt-6-luna",
+      "track": "A",
+      "track_config": "tpu-a-6h",
+      "comparison_key": {
+        "challenge_id": "lm-pretrain",
+        "runtime_profile": "tpu-v5e-x4",
+        "track": "A",
+        "track_config": "tpu-a-6h"
+      },
+      "challenge_manifest_sha256": null,
+      "task_manifest_sha256": "dc9120c54e75b721c7a483733f5828fb4793c5fbaf7d536511da9942d0a9278f",
+      "max_leases": null,
+      "status": "finalized",
+      "outcome": "success",
+      "test_nll": 3.1863305611878885,
+      "score": 70.56481765010074,
+      "seconds_per_task": 0.06429212392529315,
+      "ms": 64.29212392529315,
+      "ppl": 24.199465864105736,
+      "evaluation_seconds": 131.67026979900038,
+      "tasks_per_second": 15.554004735665455,
+      "input_tokens_per_second": 10443.542054703374,
+      "task_count": 2048,
+      "budget_hours": 6.0,
+      "lease_hours": 4.872251219444444,
+      "research_hours": 4.875910074444445,
+      "leases": 2,
+      "candidates": 1,
+      "first_analysis": 3.237965468465109,
+      "final_analysis": 3.237965468465109,
+      "reasoning_effort": "xhigh",
+      "points": [
+        {
+          "index": 1,
+          "candidate_id": "04ba8e213e15",
+          "lease": "lease-0002",
+          "hours": 4.872251219444444,
+          "research_hours": 4.874955868333333,
+          "nll": 3.237965468465109,
+          "score": 70.08781663525359,
+          "ppl": 25.481825395536852,
+          "seconds_per_task": 0.06371601274511818,
+          "ms": 63.71601274511818,
+          "evaluation_seconds": 130.49039410200203,
+          "tasks_per_second": 15.694641847729532,
+          "input_tokens_per_second": 10537.971085634897,
+          "task_count": 2048,
+          "final": true
+        }
+      ],
+      "reasoning_tokens": null,
+      "output_tokens": 146176,
+      "total_tokens": 78881278,
+      "agent_turns": null,
+      "model_calls": null,
+      "runtime": "1 host × 4 Google Cloud TPU v5e (v5litepod-4)",
+      "runner": "host_cli",
+      "agent_tool": "Codex CLI 0.159.2",
+      "inference_source": "ChatGPT Pro subscription",
+      "core_revision": "ab09cdfe7b73",
+      "comparable_harness": false
+    },
+    {
+      "model": "gpt-5.6-terra",
+      "track": "A",
+      "track_config": "tpu-a-6h",
+      "comparison_key": {
+        "challenge_id": "lm-pretrain",
+        "runtime_profile": "tpu-v5e-x4",
+        "track": "A",
+        "track_config": "tpu-a-6h"
+      },
+      "challenge_manifest_sha256": null,
+      "task_manifest_sha256": "dc9120c54e75b721c7a483733f5828fb4793c5fbaf7d536511da9942d0a9278f",
+      "max_leases": null,
+      "status": "finalized",
+      "outcome": "success",
+      "test_nll": 3.2641472904497437,
+      "score": 69.84595010898738,
+      "seconds_per_task": 0.016506539161619926,
+      "ms": 16.506539161619926,
+      "ppl": 26.157796475406613,
+      "evaluation_seconds": 33.80539220299761,
+      "tasks_per_second": 60.582051162192954,
+      "input_tokens_per_second": 40677.06097721493,
+      "task_count": 2048,
+      "budget_hours": 6.0,
+      "lease_hours": 5.693984459444445,
+      "research_hours": 5.702126170833333,
+      "leases": 1,
+      "candidates": 1,
+      "first_analysis": 3.327758818696512,
+      "final_analysis": 3.327758818696512,
+      "reasoning_effort": "xhigh",
+      "points": [
+        {
+          "index": 1,
+          "candidate_id": "df190c170e7f",
+          "lease": "lease-0001",
+          "hours": 5.693984459444445,
+          "research_hours": 5.700252230277777,
+          "nll": 3.327758818696512,
+          "score": 69.25830959349695,
+          "ppl": 27.875796927431484,
+          "seconds_per_task": 0.016854542614746393,
+          "ms": 16.854542614746393,
+          "evaluation_seconds": 34.51810327500061,
+          "tasks_per_second": 59.33118583265968,
+          "input_tokens_per_second": 39837.18308751643,
+          "task_count": 2048,
+          "final": true
+        }
+      ],
+      "reasoning_tokens": null,
+      "output_tokens": 28802,
+      "total_tokens": 5110192,
+      "agent_turns": null,
+      "model_calls": null,
+      "runtime": "1 host × 4 Google Cloud TPU v5e (v5litepod-4)",
+      "runner": "host_cli",
+      "agent_tool": "Codex CLI 0.159.2",
+      "inference_source": "ChatGPT Pro subscription",
+      "core_revision": "ab09cdfe7b73",
+      "comparable_harness": false
+    },
+    {
+      "model": "kimi-k3",
+      "track": "A",
+      "track_config": "tpu-a-6h",
+      "comparison_key": {
+        "challenge_id": "lm-pretrain",
+        "runtime_profile": "tpu-v5e-x4",
+        "track": "A",
+        "track_config": "tpu-a-6h"
+      },
+      "challenge_manifest_sha256": null,
+      "task_manifest_sha256": "dc9120c54e75b721c7a483733f5828fb4793c5fbaf7d536511da9942d0a9278f",
+      "max_leases": null,
+      "status": "finalized",
+      "outcome": "success",
+      "test_nll": 3.2212907810589737,
+      "score": 70.24185666813835,
+      "seconds_per_task": 0.0093912640698246,
+      "ms": 9.3912640698246,
+      "ppl": 25.060446863655883,
+      "evaluation_seconds": 19.233308815000782,
+      "tasks_per_second": 106.48193816774197,
+      "input_tokens_per_second": 71495.96635850325,
+      "task_count": 2048,
+      "budget_hours": 6.0,
+      "lease_hours": 4.04505614,
+      "research_hours": 4.051378586388889,
+      "leases": 1,
+      "candidates": 1,
+      "first_analysis": 3.2877638252577746,
+      "final_analysis": 3.2877638252577746,
+      "reasoning_effort": "max",
+      "points": [
+        {
+          "index": 1,
+          "candidate_id": "99a3634f26c3",
+          "lease": "lease-0001",
+          "hours": 4.04505614,
+          "research_hours": 4.050410671944444,
+          "nll": 3.2877638252577746,
+          "score": 69.62778159344958,
+          "ppl": 26.782905385751885,
+          "seconds_per_task": 0.009396724088866826,
+          "ms": 9.396724088866826,
+          "evaluation_seconds": 19.24449093399926,
+          "tasks_per_second": 106.4200662425316,
+          "input_tokens_per_second": 71454.42322771982,
+          "task_count": 2048,
+          "final": true
+        }
+      ],
+      "reasoning_tokens": null,
+      "output_tokens": null,
+      "total_tokens": null,
+      "agent_turns": null,
+      "model_calls": null,
+      "runtime": "1 host × 4 Google Cloud TPU v5e (v5litepod-4)",
+      "runner": "host_cli",
+      "agent_tool": "Cursor CLI 2026.09.23",
+      "inference_source": "Cursor subscription",
+      "core_revision": "ab09cdfe7b73",
+      "comparable_harness": false
     }
-  ]
+  ],
+  "tpu": {
+    "runtime": "1 host × 4 Google Cloud TPU v5e (v5litepod-4)",
+    "track_config": "tpu-a-6h",
+    "budget_hours": 6.0,
+    "task": "lm-pretrain (JAX image, task-tpu-jax)",
+    "core_revisions": [
+      "2f0ca1bb8971",
+      "ab09cdfe7b73"
+    ],
+    "selection": "Latest completed attempt per model; attempts stopped by relay balance or quota and the Track B pilot are excluded.",
+    "excluded_attempts": [
+      {
+        "model": "claude-opus-5",
+        "outcome": "dnf",
+        "reason": "relay HTTP 402 (balance)"
+      },
+      {
+        "model": "kimi-k3",
+        "outcome": "dnf",
+        "reason": "relay HTTP 402 (balance)"
+      },
+      {
+        "model": "deepseek-v4.1-flash",
+        "outcome": "dnf",
+        "reason": "relay HTTP 402 (balance)"
+      },
+      {
+        "model": "glm-5.3",
+        "outcome": "dnf",
+        "reason": "relay HTTP 402 (balance)"
+      },
+      {
+        "model": "claude-sonnet-5",
+        "outcome": "dnf",
+        "reason": "relay HTTP 402 (balance)"
+      },
+      {
+        "model": "gpt-6.1-sol",
+        "outcome": "dnf",
+        "reason": "relay HTTP 402 (balance)"
+      },
+      {
+        "model": "deepseek-v4-pro",
+        "outcome": "dnf",
+        "reason": "relay HTTP 402 (balance)"
+      },
+      {
+        "model": "gpt-5.6-terra",
+        "outcome": "dnf",
+        "reason": "relay HTTP 402 (balance)"
+      },
+      {
+        "model": "kimi-k3",
+        "outcome": "dnf",
+        "reason": "relay HTTP 402 (balance), rerun"
+      },
+      {
+        "model": "glm-5.3",
+        "outcome": "stopped",
+        "reason": "OpenCode Go 5-hour quota, operator stop"
+      }
+    ]
+  }
 }</script>
-<script type="application/json" id="i18n-data">{"页面语言": "Language", "页面导航": "Navigation", "RSI 分析": "RSI analysis", "最新实验结果": "Latest results", "可视化脚本 ↗": "Visualization scripts ↗", "从实验中学习，模型做得如何？": "How well do models learn from experiments?", "把 RSI 看作 meta-learning：内层训练语言模型，外层根据实验反馈调整方法。一起看最终质量、候选轨迹，以及每次改进花掉的预算。": "View RSI as meta-learning: the inner loop trains a language model, while the outer loop adapts the method using experimental feedback. Explore final quality, candidate trajectories, and the budget spent on improvement.", "实验概况": "Experiment overview", "研究模型": "Research agent models", "已完成实验": "Completed experiments", "Track A / Track B 预算上限": "Track A / Track B budget limits", "相同任务、数据及评估器": "Same task, data, and evaluator", "如何解读：": "How to read this: ", "A 与 B 都允许自我改进，预算规则不同。这里展示观察结果，尚无同预算 RSI-off 对照。ANALYSIS 分数在研究结束后计算，并不是 Agent 当时获得的反馈。": "Both tracks allow self-improvement under different budget rules. These are observational results, with no equal-budget RSI-off control. ANALYSIS scores are computed after research ends; the agent did not receive them as feedback.", "选择比较范围": "Choose what to compare", "选择 Track": "Select a track", "全部模型": "All models", "聚焦主要模型": "Focus on key models", "筛选模型": "Filter models", "点击模型名称可隐藏或恢复；图表和结果表会同步更新。默认显示全部模型。": "Click a model to hide or restore it. The chart and tables update together. All models are shown by default.", "自定义比较图": "Customize the chart", "横纵轴可选 Score、NLL、PPL、推理耗时、吞吐、预算等指标。悬停点附近即可查看详细信息。": "Choose Score, NLL, PPL, inference latency, throughput, budget, and other metrics for either axis. Hover near a point for details.", "常用指标组合": "Common metric pairs", "Score × 时间": "Score × time", "NLL × 时间": "NLL × time", "数据范围": "Data view", "图表数据范围": "Chart data view", "候选 · ANALYSIS": "Candidates · ANALYSIS", "最终 · TEST": "Final · TEST", "横轴": "X axis", "横轴指标": "X-axis metric", "横轴刻度": "X-axis scale", "线性": "Linear", "对数": "Log", "交换横纵轴": "Swap axes", "纵轴": "Y axis", "纵轴指标": "Y-axis metric", "纵轴刻度": "Y-axis scale", "按所选横纵轴比较模型": "Compare models using the selected axes", "悬停、点击或键盘聚焦数据点，查看模型和精确数值。": "Hover, tap, or focus a point with the keyboard to see the model and exact values.", "Track B · 最终结果": "Track B · Final results", "Track {track} · 最终结果": "Track {track} · Final results", "按 NLL 升序排列；提交候选数与元学习次数不同。": "Sorted by increasing NLL. Candidate count is not the number of meta-learning steps.", "下载汇总 JSON": "Download summary JSON", "模型": "Model", "租约小时": "Lease hours", "候选数": "Candidates", "ANALYSIS 首 → 末": "ANALYSIS first → final", "s/task 为每条任务的推理秒数（1 s = 1000 ms）。Score 与 NLL 来自同一个质量指标。租约小时包含运行环境内的全部占用，不等于纯 GPU 计算时间。": "s/task is inference seconds per task (1 s = 1000 ms). Score and NLL express the same quality metric. Lease hours include all time occupying the training environment, not just GPU computation.", "同一模型在两种预算下的结果": "The same model under two budget rules", "这是一组描述性配对，不合并成同一预算下的排名。": "These pairs describe outcomes under different budgets; they are not a single equal-budget ranking.", "较低 NLL": "Lower NLL", "负值表示本次 B 的 NLL 更低。结果同时受初始配方、实际训练量、推理配置和随机性影响，差值不等于 RSI 增益。": "A negative difference means Track B achieved lower NLL in this run. Initial recipes, actual training, agent inference settings, and randomness also affect the outcome. The difference is not an RSI effect estimate.", "三个值得保留的判断": "Three findings to keep in mind", "01 / 方法改进": "01 / Improving the method", "Fable / Opus：完整的反馈闭环": "Fable / Opus: a complete feedback loop", "A 组都通过测量瓶颈，把训练吞吐提升到约 2.1 倍。Opus 还调整不稳定的训练策略，并放弃实测无收益的权重平均。B 组两者只差 0.00031 NLL，单次实验不足以区分优劣。": "In Track A, both identified bottlenecks and raised training throughput to about 2.1× its initial level. Opus also corrected an unstable training strategy and rejected weight averaging after measuring no benefit. Their Track B NLL differs by only 0.00031; a single run cannot establish a winner.", "02 / 诊断与取舍": "02 / Diagnosis and tradeoffs", "Astra / Kimi：不同的适应能力": "Astra / Kimi: different strengths in adaptation", "Astra 比较上下文长度与校准方案，在 B 组获得最低的推理耗时点估计。Kimi 在更换验证样本后，把旧、新候选放到相同样本上重测，避免把测量变化误判为进步。": "Astra compared context lengths and calibration choices, achieving the lowest observed inference latency in Track B. After changing its validation sample, Kimi re-evaluated both candidates on the same examples to distinguish model improvement from a change in measurement.", "03 / 归因边界": "03 / Limits of attribution", "首末涨幅需要结合起点": "Interpret improvement in light of its starting point", "早期保险候选、错误修复、更多梯度训练和方法更新，都可能拉大首末差值。Flash B 到第 5 租约才提交首候选，不能与从第 1 租约开始提交的曲线直接比较涨幅。": "Early fallback candidates, bug fixes, additional gradient training, and method changes can all increase the first-to-final difference. Flash B first submitted a candidate in lease 5, so its improvement is not directly comparable to a trajectory starting in lease 1.", "其余模型的过程证据": "Process evidence for the other models", "DeepSeek Flash：B 的高吞吐配方与持续训练获得优秀终点；A 的退火与低学习率续训也改善了自评与候选结果。": "DeepSeek Flash: a high-throughput recipe and continued training produced a strong Track B result. In A, cooldown and low-learning-rate continuation improved local validation and candidate results.", "GLM：通过 profiling、CUDA graphs 与位置表示调整提高吞吐；实现收益没有全部转化成最优质量。": "GLM: profiling, CUDA graphs, and changes to positional representations improved throughput. These implementation gains did not fully translate into leading model quality.", "Sonnet：B 修复逐元素输出检查瓶颈，本地 1000 样本耗时约 25 s → 3.4 s；A 的自评未充分覆盖最终表现。": "Sonnet: fixing per-element output validation in B reduced local runtime for 1,000 examples from about 25 s to 3.4 s. Local validation in A did not adequately capture final performance.", "Sol：B 候选稳定改善，主要沿相同配方续训；方法层改进的独立贡献尚未识别。": "Sol: B candidates improved steadily, mainly through continued training with the same recipe. The independent contribution of method changes has not been isolated.", "DeepSeek Pro：两轨初始配方、搜索成本和最终结果差异较大。": "DeepSeek Pro: initial recipes, search costs, and final outcomes differed substantially between tracks.", "Terra / Luna：错误修复、验证覆盖和预算分配仍限制结果；大幅下降不能自动归因于更强元学习。": "Terra / Luna: bug recovery, validation coverage, and budget allocation still limit results. A large loss reduction does not by itself establish stronger meta-learning.", "数据口径与复现": "Data definitions and reproducibility", "每个模型／Track 采用最新授权尝试。GLM B 与 Flash A 的旧失败尝试单独排除。": "Each model/track uses its latest authorized attempt. Earlier failed GLM B and Flash A attempts are excluded separately.", "本批为 host_cli preview，不属于正式 leaderboard；每种配置只有一次运行，未估计训练种子方差。": "These are host_cli preview runs, not official leaderboard entries. Each configuration has one run; variation across training seeds has not been estimated.", "A 是研究墙钟上限；B 是训练环境租约上限。部分批次的输出上限等推理配置有差异。": "A limits research wall-clock time; B limits training-environment leases. Some batches use different output limits and other agent inference settings.", "页面公开模型结果、候选轨迹与汇总指标。该页为一次结果快照，重新构建后更新。": "The page publishes model results, candidate trajectories, and aggregate metrics. It is a snapshot that updates when rebuilt.", "查看数据身份": "View data provenance", "构建脚本": "Build script", "页面模板": "Page template", "数据快照：{time} · lm-pretrain · 单卡 H200": "Snapshot: {time} · lm-pretrain · single H200", "Core: {revision} · 源快照 SHA256: {hash}": "Core: {revision} · Source snapshot SHA256: {hash}", "困惑度 PPL ↓": "Perplexity PPL ↓", "推理耗时 / ms per task ↓": "Inference latency / ms per task ↓", "评估总耗时 / s ↓": "Total evaluation time / s ↓", "推理吞吐 / tasks per s ↑": "Inference throughput / tasks per s ↑", "输入吞吐 / tokens per s ↑": "Input throughput / tokens per s ↑", "累计租约时间 / h": "Cumulative lease time / h", "提交时研究用时 / h": "Research time at submission / h", "候选提交序号": "Candidate submission number", "来源租约序号": "Source lease number", "较首候选 Score 提升 ↑": "Score gain since first candidate ↑", "较首候选 NLL 下降 ↑": "NLL decrease since first candidate ↑", "总租约时间 / h": "Total lease time / h", "研究用时 / h": "Research time / h", "提交候选数": "Candidate count", "使用租约数": "Leases used", "Agent 推理 tokens": "Agent reasoning tokens", "Agent 输出 tokens": "Agent output tokens", "Agent 总 tokens（含缓存）": "Agent total tokens (incl. cache)", "Agent 对话轮数": "Agent turns", "首候选 ANALYSIS NLL ↓": "First-candidate ANALYSIS NLL ↓", "最终候选 ANALYSIS NLL ↓": "Final-candidate ANALYSIS NLL ↓", "首末 ANALYSIS NLL 下降 ↑": "First-to-final ANALYSIS NLL decrease ↑", "未记录": "Not recorded", "困惑度 PPL": "Perplexity PPL", "推理耗时 · s/task": "Inference latency · s/task", "评估总耗时 · s": "Evaluation time · s", "推理吞吐 · tasks/s": "Inference throughput · tasks/s", "租约累计 · h": "Cumulative lease time · h", "研究用时 · h": "Research time · h", "较首候选 Score 提升": "Score gain since first candidate", "输入吞吐 · tokens/s": "Input throughput · tokens/s", "提交候选 / 使用租约": "Candidates / leases used", "候选 #{index}": "Candidate #{index}", "最终选定": "Final selection", "最终选定结果": "Final selected result", "研究墙钟上限": "research wall-clock limit", "租约总上限": "total lease budget", "候选 ID": "Candidate ID", "样本数": "Examples", "ANALYSIS 为研究结束后评估。": "ANALYSIS is evaluated after research ends. ", "TEST 仅评估最终候选。": "TEST evaluates only the final candidate. ", "PPL = exp(NLL)。": "PPL = exp(NLL).", "{axis}含零或负值，使用线性刻度": "{axis} contains zero or negative values; using a linear scale", "每个点是一份已提交候选，Score / NLL / 耗时均来自该候选的 ANALYSIS 评估。": "Each point is a submitted candidate. Its Score, NLL, and latency come from that candidate's ANALYSIS evaluation.", "同色连线按提交顺序连接，不表示中间训练轨迹。": "Lines of the same color connect submissions in order; they do not show intervening training.", "当前组合显示散点；选择时间或序号指标可查看连线。": "This metric pair uses scatter points. Choose a time or sequence metric to connect submissions.", "租约时间包含测量、训练和打包。": "Lease time includes measurement, training, and packaging.", "每个点是一个模型的最终 TEST 结果。Score / NLL / 耗时均来自 TEST；首末 ANALYSIS 下降单独标注。观察差值不等于 RSI 因果增益。": "Each point is a model's final TEST result. Score, NLL, and latency come from TEST; first-to-final ANALYSIS improvement is labeled separately. Observed differences are not causal RSI effect estimates.", "候选过程": "candidate history", "最终结果": "final results", "Track {track} · {view}；横轴 {x}；纵轴 {y}": "Track {track} · {view}; X axis {x}; Y axis {y}", "当前指标没有可用数据": "No data available for these metrics", "请选择至少一个模型": "Select at least one model", "提交 {index}": "Submission {index}", "最终候选": "Final candidate", "最多 8 小时研究墙钟；可多次实验和开租约。": "Up to 8 hours of research wall-clock time; multiple experiments and leases are allowed.", "最多 6 个训练租约，每次最多 1 小时。": "Up to 6 training leases, each lasting at most 1 hour.", "请选择模型。": "Select a model.", "未完成": "Incomplete", "相同": "Equal", "B6 → B12：增加租约后的结果": "B6 → B12: results with more leases", "独立新运行，每种配置一次；差值包含训练量、策略与随机性变化，不是纯预算因果效应。": "Fresh independent runs, one per configuration. Differences include training volume, strategy, and randomness; they do not isolate a causal budget effect.", "B12 · 租约小时": "B12 · Lease hours", "同一模型：A8 与 B6": "Same model: A8 versus B6", "A 组通过测量瓶颈改善吞吐，最终加速也包含模型配置变化。Opus 还调整不稳定的训练策略，并放弃实测无收益的权重平均。B6 组两者只差 0.00031 NLL，单次实验不足以区分优劣。": "Both improved Track A throughput by measuring bottlenecks; final speedups also include model configuration changes. Opus corrected unstable training and rejected unhelpful weight averaging. Their B6 results differ by just 0.00031 NLL, too little to distinguish them from single runs.", "Astra 比较上下文长度与校准方案，在 B6 组获得最低的推理耗时点估计。Kimi 在更换验证样本后，把旧、新候选放到相同样本上重测，避免把测量变化误判为进步。": "Astra compared context lengths and calibration choices, achieving the lowest observed inference latency in Track B6. After changing its validation sample, Kimi re-evaluated both candidates on the same examples to distinguish model improvement from a change in measurement.", "最多 12 个训练租约，每次最多 1 小时；GLM 5.3 未完成，已排除。": "Up to 12 training leases of one hour each; GLM 5.3 did not finish and is excluded.", "10 个模型完成了 B12；GLM 5.3 的 B12 在第 11 个租约后 Agent 退出、没有 TEST，已排除。负值表示 B12 的 NLL 更低。": "Ten models completed B12. GLM 5.3’s B12 Agent exited after its 11th lease with no TEST, so it is excluded. Negative values mean B12 reached a lower NLL.", "每个模型／Track 配置采用最新授权尝试。A8、B6、B12 分开保留；B12 覆盖 10 个模型。GLM B6 与 Flash A 的旧失败尝试，以及未完成的 GLM B12，单独排除。": "Each model/Track configuration uses its latest authorized attempt. A8, B6, and B12 stay separate; B12 covers 10 models. Earlier failed GLM B6 and Flash A attempts, and the unfinished GLM B12 run, are excluded."}</script>
+<script type="application/json" id="i18n-data">{"页面语言": "Language", "页面导航": "Navigation", "RSI 分析": "RSI analysis", "最新实验结果": "Latest results", "可视化脚本 ↗": "Visualization scripts ↗", "从实验中学习，模型做得如何？": "How well do models learn from experiments?", "把 RSI 看作 meta-learning：内层训练语言模型，外层根据实验反馈调整方法。一起看最终质量、候选轨迹，以及每次改进花掉的预算。": "View RSI as meta-learning: the inner loop trains a language model, while the outer loop adapts the method using experimental feedback. Explore final quality, candidate trajectories, and the budget spent on improvement.", "实验概况": "Experiment overview", "研究模型": "Research agent models", "已完成实验": "Completed experiments", "Track A / Track B 预算上限": "Track A / Track B budget limits", "如何解读：": "How to read this: ", "A 与 B 都允许自我改进，预算规则不同。这里展示观察结果，尚无同预算 RSI-off 对照。ANALYSIS 分数在研究结束后计算，并不是 Agent 当时获得的反馈。": "Both tracks allow self-improvement under different budget rules. These are observational results, with no equal-budget RSI-off control. ANALYSIS scores are computed after research ends; the agent did not receive them as feedback.", "选择比较范围": "Choose what to compare", "选择 Track": "Select a track", "全部模型": "All models", "聚焦主要模型": "Focus on key models", "筛选模型": "Filter models", "点击模型名称可隐藏或恢复；图表和结果表会同步更新。默认显示全部模型。": "Click a model to hide or restore it. The chart and tables update together. All models are shown by default.", "自定义比较图": "Customize the chart", "横纵轴可选 Score、NLL、PPL、推理耗时、吞吐、预算等指标。悬停点附近即可查看详细信息。": "Choose Score, NLL, PPL, inference latency, throughput, budget, and other metrics for either axis. Hover near a point for details.", "常用指标组合": "Common metric pairs", "Score × 时间": "Score × time", "NLL × 时间": "NLL × time", "数据范围": "Data view", "图表数据范围": "Chart data view", "候选 · ANALYSIS": "Candidates · ANALYSIS", "最终 · TEST": "Final · TEST", "横轴": "X axis", "横轴指标": "X-axis metric", "横轴刻度": "X-axis scale", "线性": "Linear", "对数": "Log", "交换横纵轴": "Swap axes", "纵轴": "Y axis", "纵轴指标": "Y-axis metric", "纵轴刻度": "Y-axis scale", "按所选横纵轴比较模型": "Compare models using the selected axes", "悬停、点击或键盘聚焦数据点，查看模型和精确数值。": "Hover, tap, or focus a point with the keyboard to see the model and exact values.", "Track B · 最终结果": "Track B · Final results", "Track {track} · 最终结果": "Track {track} · Final results", "按 NLL 升序排列；提交候选数与元学习次数不同。": "Sorted by increasing NLL. Candidate count is not the number of meta-learning steps.", "下载汇总 JSON": "Download summary JSON", "模型": "Model", "租约小时": "Lease hours", "候选数": "Candidates", "ANALYSIS 首 → 末": "ANALYSIS first → final", "s/task 为每条任务的推理秒数（1 s = 1000 ms）。Score 与 NLL 来自同一个质量指标。租约小时包含运行环境内的全部占用，不等于纯 GPU 计算时间。": "s/task is inference seconds per task (1 s = 1000 ms). Score and NLL express the same quality metric. Lease hours include all time occupying the training environment, not just GPU computation.", "同一模型在两种预算下的结果": "The same model under two budget rules", "这是一组描述性配对，不合并成同一预算下的排名。": "These pairs describe outcomes under different budgets; they are not a single equal-budget ranking.", "较低 NLL": "Lower NLL", "负值表示本次 B 的 NLL 更低。结果同时受初始配方、实际训练量、推理配置和随机性影响，差值不等于 RSI 增益。": "A negative difference means Track B achieved lower NLL in this run. Initial recipes, actual training, agent inference settings, and randomness also affect the outcome. The difference is not an RSI effect estimate.", "三个值得保留的判断": "Three findings to keep in mind", "01 / 方法改进": "01 / Improving the method", "Fable / Opus：完整的反馈闭环": "Fable / Opus: a complete feedback loop", "A 组都通过测量瓶颈，把训练吞吐提升到约 2.1 倍。Opus 还调整不稳定的训练策略，并放弃实测无收益的权重平均。B 组两者只差 0.00031 NLL，单次实验不足以区分优劣。": "In Track A, both identified bottlenecks and raised training throughput to about 2.1× its initial level. Opus also corrected an unstable training strategy and rejected weight averaging after measuring no benefit. Their Track B NLL differs by only 0.00031; a single run cannot establish a winner.", "02 / 诊断与取舍": "02 / Diagnosis and tradeoffs", "Astra / Kimi：不同的适应能力": "Astra / Kimi: different strengths in adaptation", "Astra 比较上下文长度与校准方案，在 B 组获得最低的推理耗时点估计。Kimi 在更换验证样本后，把旧、新候选放到相同样本上重测，避免把测量变化误判为进步。": "Astra compared context lengths and calibration choices, achieving the lowest observed inference latency in Track B. After changing its validation sample, Kimi re-evaluated both candidates on the same examples to distinguish model improvement from a change in measurement.", "03 / 归因边界": "03 / Limits of attribution", "首末涨幅需要结合起点": "Interpret improvement in light of its starting point", "早期保险候选、错误修复、更多梯度训练和方法更新，都可能拉大首末差值。Flash B 到第 5 租约才提交首候选，不能与从第 1 租约开始提交的曲线直接比较涨幅。": "Early fallback candidates, bug fixes, additional gradient training, and method changes can all increase the first-to-final difference. Flash B first submitted a candidate in lease 5, so its improvement is not directly comparable to a trajectory starting in lease 1.", "其余模型的过程证据": "Process evidence for the other models", "DeepSeek Flash：B 的高吞吐配方与持续训练获得优秀终点；A 的退火与低学习率续训也改善了自评与候选结果。": "DeepSeek Flash: a high-throughput recipe and continued training produced a strong Track B result. In A, cooldown and low-learning-rate continuation improved local validation and candidate results.", "GLM：通过 profiling、CUDA graphs 与位置表示调整提高吞吐；实现收益没有全部转化成最优质量。": "GLM: profiling, CUDA graphs, and changes to positional representations improved throughput. These implementation gains did not fully translate into leading model quality.", "Sonnet：B 修复逐元素输出检查瓶颈，本地 1000 样本耗时约 25 s → 3.4 s；A 的自评未充分覆盖最终表现。": "Sonnet: fixing per-element output validation in B reduced local runtime for 1,000 examples from about 25 s to 3.4 s. Local validation in A did not adequately capture final performance.", "Sol：B 候选稳定改善，主要沿相同配方续训；方法层改进的独立贡献尚未识别。": "Sol: B candidates improved steadily, mainly through continued training with the same recipe. The independent contribution of method changes has not been isolated.", "DeepSeek Pro：两轨初始配方、搜索成本和最终结果差异较大。": "DeepSeek Pro: initial recipes, search costs, and final outcomes differed substantially between tracks.", "Terra / Luna：错误修复、验证覆盖和预算分配仍限制结果；大幅下降不能自动归因于更强元学习。": "Terra / Luna: bug recovery, validation coverage, and budget allocation still limit results. A large loss reduction does not by itself establish stronger meta-learning.", "数据口径与复现": "Data definitions and reproducibility", "每个模型／Track 采用最新授权尝试。GLM B 与 Flash A 的旧失败尝试单独排除。": "Each model/track uses its latest authorized attempt. Earlier failed GLM B and Flash A attempts are excluded separately.", "本批为 host_cli preview，不属于正式 leaderboard；每种配置只有一次运行，未估计训练种子方差。": "These are host_cli preview runs, not official leaderboard entries. Each configuration has one run; variation across training seeds has not been estimated.", "A 是研究墙钟上限；B 是训练环境租约上限。部分批次的输出上限等推理配置有差异。": "A limits research wall-clock time; B limits training-environment leases. Some batches use different output limits and other agent inference settings.", "页面公开模型结果、候选轨迹与汇总指标。该页为一次结果快照，重新构建后更新。": "The page publishes model results, candidate trajectories, and aggregate metrics. It is a snapshot that updates when rebuilt.", "查看数据身份": "View data provenance", "构建脚本": "Build script", "页面模板": "Page template", "Core: {revision} · 源快照 SHA256: {hash}": "Core: {revision} · Source snapshot SHA256: {hash}", "困惑度 PPL ↓": "Perplexity PPL ↓", "推理耗时 / ms per task ↓": "Inference latency / ms per task ↓", "评估总耗时 / s ↓": "Total evaluation time / s ↓", "推理吞吐 / tasks per s ↑": "Inference throughput / tasks per s ↑", "输入吞吐 / tokens per s ↑": "Input throughput / tokens per s ↑", "累计租约时间 / h": "Cumulative lease time / h", "提交时研究用时 / h": "Research time at submission / h", "候选提交序号": "Candidate submission number", "来源租约序号": "Source lease number", "较首候选 Score 提升 ↑": "Score gain since first candidate ↑", "较首候选 NLL 下降 ↑": "NLL decrease since first candidate ↑", "总租约时间 / h": "Total lease time / h", "研究用时 / h": "Research time / h", "提交候选数": "Candidate count", "使用租约数": "Leases used", "Agent 推理 tokens": "Agent reasoning tokens", "Agent 输出 tokens": "Agent output tokens", "Agent 总 tokens（含缓存）": "Agent total tokens (incl. cache)", "Agent 对话轮数": "Agent turns", "首候选 ANALYSIS NLL ↓": "First-candidate ANALYSIS NLL ↓", "最终候选 ANALYSIS NLL ↓": "Final-candidate ANALYSIS NLL ↓", "首末 ANALYSIS NLL 下降 ↑": "First-to-final ANALYSIS NLL decrease ↑", "未记录": "Not recorded", "困惑度 PPL": "Perplexity PPL", "推理耗时 · s/task": "Inference latency · s/task", "评估总耗时 · s": "Evaluation time · s", "推理吞吐 · tasks/s": "Inference throughput · tasks/s", "租约累计 · h": "Cumulative lease time · h", "研究用时 · h": "Research time · h", "较首候选 Score 提升": "Score gain since first candidate", "输入吞吐 · tokens/s": "Input throughput · tokens/s", "提交候选 / 使用租约": "Candidates / leases used", "候选 #{index}": "Candidate #{index}", "最终选定": "Final selection", "最终选定结果": "Final selected result", "研究墙钟上限": "research wall-clock limit", "租约总上限": "total lease budget", "候选 ID": "Candidate ID", "样本数": "Examples", "ANALYSIS 为研究结束后评估。": "ANALYSIS is evaluated after research ends. ", "TEST 仅评估最终候选。": "TEST evaluates only the final candidate. ", "PPL = exp(NLL)。": "PPL = exp(NLL).", "{axis}含零或负值，使用线性刻度": "{axis} contains zero or negative values; using a linear scale", "每个点是一份已提交候选，Score / NLL / 耗时均来自该候选的 ANALYSIS 评估。": "Each point is a submitted candidate. Its Score, NLL, and latency come from that candidate's ANALYSIS evaluation.", "同色连线按提交顺序连接，不表示中间训练轨迹。": "Lines of the same color connect submissions in order; they do not show intervening training.", "当前组合显示散点；选择时间或序号指标可查看连线。": "This metric pair uses scatter points. Choose a time or sequence metric to connect submissions.", "租约时间包含测量、训练和打包。": "Lease time includes measurement, training, and packaging.", "每个点是一个模型的最终 TEST 结果。Score / NLL / 耗时均来自 TEST；首末 ANALYSIS 下降单独标注。观察差值不等于 RSI 因果增益。": "Each point is a model's final TEST result. Score, NLL, and latency come from TEST; first-to-final ANALYSIS improvement is labeled separately. Observed differences are not causal RSI effect estimates.", "候选过程": "candidate history", "最终结果": "final results", "Track {track} · {view}；横轴 {x}；纵轴 {y}": "Track {track} · {view}; X axis {x}; Y axis {y}", "当前指标没有可用数据": "No data available for these metrics", "请选择至少一个模型": "Select at least one model", "提交 {index}": "Submission {index}", "最终候选": "Final candidate", "最多 8 小时研究墙钟；可多次实验和开租约。": "Up to 8 hours of research wall-clock time; multiple experiments and leases are allowed.", "最多 6 个训练租约，每次最多 1 小时。": "Up to 6 training leases, each lasting at most 1 hour.", "请选择模型。": "Select a model.", "未完成": "Incomplete", "相同": "Equal", "B6 → B12：增加租约后的结果": "B6 → B12: results with more leases", "独立新运行，每种配置一次；差值包含训练量、策略与随机性变化，不是纯预算因果效应。": "Fresh independent runs, one per configuration. Differences include training volume, strategy, and randomness; they do not isolate a causal budget effect.", "B12 · 租约小时": "B12 · Lease hours", "同一模型：A8 与 B6": "Same model: A8 versus B6", "A 组通过测量瓶颈改善吞吐，最终加速也包含模型配置变化。Opus 还调整不稳定的训练策略，并放弃实测无收益的权重平均。B6 组两者只差 0.00031 NLL，单次实验不足以区分优劣。": "Both improved Track A throughput by measuring bottlenecks; final speedups also include model configuration changes. Opus corrected unstable training and rejected unhelpful weight averaging. Their B6 results differ by just 0.00031 NLL, too little to distinguish them from single runs.", "Astra 比较上下文长度与校准方案，在 B6 组获得最低的推理耗时点估计。Kimi 在更换验证样本后，把旧、新候选放到相同样本上重测，避免把测量变化误判为进步。": "Astra compared context lengths and calibration choices, achieving the lowest observed inference latency in Track B6. After changing its validation sample, Kimi re-evaluated both candidates on the same examples to distinguish model improvement from a change in measurement.", "最多 12 个训练租约，每次最多 1 小时；GLM 5.3 未完成，已排除。": "Up to 12 training leases of one hour each; GLM 5.3 did not finish and is excluded.", "10 个模型完成了 B12；GLM 5.3 的 B12 在第 11 个租约后 Agent 退出、没有 TEST，已排除。负值表示 B12 的 NLL 更低。": "Ten models completed B12. GLM 5.3’s B12 Agent exited after its 11th lease with no TEST, so it is excluded. Negative values mean B12 reached a lower NLL.", "每个模型／Track 配置采用最新授权尝试。A8、B6、B12 分开保留；B12 覆盖 10 个模型。GLM B6 与 Flash A 的旧失败尝试，以及未完成的 GLM B12，单独排除。": "Each model/Track configuration uses its latest authorized attempt. A8, B6, and B12 stay separate; B12 covers 10 models. Earlier failed GLM B6 and Flash A attempts, and the unfinished GLM B12 run, are excluded.", "两种硬件分开比较": "Hardware lanes compared separately", "数据快照：{time} · lm-pretrain · H200 与 TPU v5e": "Snapshot: {time} · lm-pretrain · H200 and TPU v5e", "4 × Cloud TPU v5e，最多 6 小时研究墙钟。7 个模型走 opencode 容器与推理网关；标 host_cli 的 4 个经 Codex/Cursor 订阅运行，不直接可比。": "4 × Cloud TPU v5e, up to 6 hours of research wall-clock time. Seven models ran in the opencode container behind the inference gateway; the four marked host_cli ran through Codex/Cursor subscriptions and are not directly comparable.", "TPU v5e · A 6 h：同一 lm-pretrain 任务（JAX 训练镜像），1 台 4 × Cloud TPU v5e，每模型一次运行。7 个模型（Astra、Opus 5、Fable 5.1、Sonnet 5、DeepSeek Pro、DeepSeek Flash 4.1、GLM 5.3）走 opencode 容器 + 推理网关；Sol 6.1、Luna 6、Terra 经 Codex（ChatGPT Pro）、Kimi K3 经 Cursor 以 host_cli 运行，工具不同，不直接可比。Sol 6.1、Luna 6 与 DeepSeek Flash 4.1 是比 H200 批次更新的版本。因中转余额或配额中止的尝试已排除。": "TPU v5e · A 6 h: the same lm-pretrain task (JAX training image) on one host with 4 × Cloud TPU v5e, one run per model. Seven models (Astra, Opus 5, Fable 5.1, Sonnet 5, DeepSeek Pro, DeepSeek Flash 4.1, GLM 5.3) ran in the opencode container behind the inference gateway; Sol 6.1, Luna 6 and Terra ran through Codex (ChatGPT Pro) and Kimi K3 through Cursor as host_cli, a different tool and not directly comparable. Sol 6.1, Luna 6 and DeepSeek Flash 4.1 are newer versions than in the H200 campaign. Attempts stopped by relay balance or quota are excluded."}</script>
 <script>
 'use strict';
 const D=JSON.parse(document.getElementById('rsi-data').textContent), $=s=>document.querySelector(s);
@@ -3049,7 +3941,7 @@ function applyLanguage(){
  staticAttributes.forEach(({node,attr,source})=>node.setAttribute(attr,t(source)));
  document.querySelectorAll('[data-lang]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.lang===language)));
  $('#swap-axes').dataset.swapLabel=t('交换横纵轴');
- $('#stamp').textContent=t('数据快照：{time} · lm-pretrain · 单卡 H200',{time:D.generated_at.replace('T',' ').replace('+00:00',' UTC')});
+ $('#stamp').textContent=t('数据快照：{time} · lm-pretrain · H200 与 TPU v5e',{time:D.generated_at.replace('T',' ').replace('+00:00',' UTC')});
  $('#provenance').textContent=t('Core: {revision} · 源快照 SHA256: {hash}',{revision:D.core_revision,hash:D.source_sha256});
 }
 document.querySelectorAll('[data-lang]').forEach(button=>button.addEventListener('click',()=>{
@@ -3059,9 +3951,11 @@ document.querySelectorAll('[data-lang]').forEach(button=>button.addEventListener
  applyLanguage();fillAxes();render();
 }));
 const defs={
-'claude-fable-5-1':['Fable 5.1','#a43d75'],'claude-opus-5':['Opus 5','#d98030'],'gpt-6-astra':['Astra','#287dc1'],'kimi-k3':['Kimi K3','#1c9681'],'deepseek-v4-flash':['DeepSeek Flash','#9268c0'],'glm-5.3':['GLM 5.3','#73853d'],'claude-sonnet-5':['Sonnet 5','#c45749'],'gpt-5.6-sol':['Sol','#4e97b3'],'deepseek-v4-pro':['DeepSeek Pro','#5c549e'],'gpt-5.6-terra':['Terra','#67718a'],'gpt-5.6-luna':['Luna','#a17d4f']};
+'claude-fable-5-1':['Fable 5.1','#a43d75'],'claude-opus-5':['Opus 5','#d98030'],'gpt-6-astra':['Astra','#287dc1'],'kimi-k3':['Kimi K3','#1c9681'],'deepseek-v4-flash':['DeepSeek Flash','#9268c0'],'glm-5.3':['GLM 5.3','#73853d'],'claude-sonnet-5':['Sonnet 5','#c45749'],'gpt-5.6-sol':['Sol','#4e97b3'],'deepseek-v4-pro':['DeepSeek Pro','#5c549e'],'gpt-5.6-terra':['Terra','#67718a'],'gpt-5.6-luna':['Luna','#a17d4f'],'gpt-6.1-sol':['Sol 6.1','#2f6f8a'],'gpt-6-luna':['Luna 6','#8f9a2a'],'deepseek-v4.1-flash':['DeepSeek Flash 4.1','#6c45a3']};
 const models=Object.keys(defs).filter(m=>D.rows.some(r=>r.model===m)), visible=new Set(models);let track='A';
-const lane=r=>r.track==='A'?'A':(r.max_leases===12||r.track_config==='preview-b-12x1h'?'B12':'B6');
+const lane=r=>r.comparison_key?.runtime_profile==='tpu-v5e-x4'?'TPU':r.track==='A'?'A':(r.max_leases===12||r.track_config==='preview-b-12x1h'?'B12':'B6');
+const laneLabel=r=>lane(r)==='TPU'?'A · TPU v5e':lane(r);
+const harness=r=>r.runner?` <span class="badge">${esc(r.runner==='container'?r.inference_source:r.agent_tool.split(' ')[0]+' · host_cli')}</span>`:'';
 const fmt=(n,d=4)=>n==null?'—':Number(n).toFixed(d), esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 $('#model-count').textContent=models.length;$('#complete-count').textContent=`${D.rows.filter(r=>r.test_nll!=null).length} / ${D.rows.length}`;
 models.forEach(m=>{const b=document.createElement('button');b.className='chip';b.setAttribute('aria-pressed','true');b.innerHTML=`<span class="dot" style="background:${defs[m][1]}"></span>${esc(defs[m][0])}`;b.dataset.model=m;b.addEventListener('click',()=>{visible.has(m)?visible.delete(m):visible.add(m);render()});$('#legend').append(b)});
@@ -3152,8 +4046,8 @@ function showTooltip(point,event){
   const budget=`${pretty(r.budget_hours,0)} h ${t(r.track==='A'?'研究墙钟上限':'租约总上限')}`;
   const choice=axisChoices[$('#plot-view').value],set=metricSets[$('#plot-view').value];
   const axes=`${t('横轴')} ${esc(t(set[choice.x].label))}: ${pretty(point.x,set[choice.x].integer?0:6)}<br>${t('纵轴')} ${esc(t(set[choice.y].label))}: ${pretty(point.y,set[choice.y].integer?0:6)}`;
-  tooltip.innerHTML=`<div class="tooltip-title"><span style="color:${defs[r.model][1]}">●</span> ${esc(defs[r.model][0])} · Track ${lane(r)}</div><div class="tooltip-subtitle">${esc(stage)} · ${source}${c?`<br>${t('候选 ID')} ${esc(c.candidate_id)}`:''}</div><dl class="tooltip-metrics">${entries.map(([label,value,cls])=>`<div class="${cls||''}"><dt>${esc(t(label))}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl><div class="tooltip-footer">${axes}<br>${t('样本数')} ${pretty(v.task_count,0)} · ${esc(budget)}<br>${t(c?'ANALYSIS 为研究结束后评估。':'TEST 仅评估最终候选。')}${t('PPL = exp(NLL)。')}</div>`;
-  $('#point-detail').textContent=`${defs[r.model][0]} · Track ${lane(r)} · ${stage} · ${source} Score ${pretty(v.score,4)} · NLL ${pretty(c?c.nll:r.test_nll,6)} · ${pretty(v.seconds_per_task,6)} s/task (${pretty(v.ms,4)} ms/task)`;
+  tooltip.innerHTML=`<div class="tooltip-title"><span style="color:${defs[r.model][1]}">●</span> ${esc(defs[r.model][0])} · Track ${laneLabel(r)}</div><div class="tooltip-subtitle">${esc(stage)} · ${source}${c?`<br>${t('候选 ID')} ${esc(c.candidate_id)}`:''}</div><dl class="tooltip-metrics">${entries.map(([label,value,cls])=>`<div class="${cls||''}"><dt>${esc(t(label))}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl><div class="tooltip-footer">${axes}<br>${t('样本数')} ${pretty(v.task_count,0)} · ${esc(budget)}<br>${t(c?'ANALYSIS 为研究结束后评估。':'TEST 仅评估最终候选。')}${t('PPL = exp(NLL)。')}</div>`;
+  $('#point-detail').textContent=`${defs[r.model][0]} · Track ${laneLabel(r)} · ${stage} · ${source} Score ${pretty(v.score,4)} · NLL ${pretty(c?c.nll:r.test_nll,6)} · ${pretty(v.seconds_per_task,6)} s/task (${pretty(v.ms,4)} ms/task)`;
  }
  tooltip.hidden=false;
  const anchor=point.circle.getBoundingClientRect(),x=event?.clientX??(anchor.left+anchor.width/2),y=event?.clientY??(anchor.top+anchor.height/2);
@@ -3258,7 +4152,7 @@ function drawPlot(rows){
  });
  points.forEach(p=>{
   const r=p.row,stage=p.candidate?` · ${t('提交 {index}',{index:p.candidate.index})}${p.candidate.final?' · '+t('最终候选'):''}`:' · '+t('最终结果');
-  const label=`${defs[r.model][0]} · Track ${lane(r)}${stage} ｜ ${xm.label}：${fmt(p.x,xm.integer?0:6)} ｜ ${ym.label}：${fmt(p.y,ym.integer?0:6)}`;
+  const label=`${defs[r.model][0]} · Track ${laneLabel(r)}${stage} ｜ ${xm.label}：${fmt(p.x,xm.integer?0:6)} ｜ ${ym.label}：${fmt(p.y,ym.integer?0:6)}`;
   const major=!p.candidate||p.candidate.final;
   if(major)el(svg,'circle',{cx:sx(p.x),cy:sy(p.y),r:13,fill:defs[r.model][1],opacity:.13,'pointer-events':'none'});
   const circle=el(svg,'circle',{cx:sx(p.x),cy:sy(p.y),r:major?7:4.6,fill:defs[r.model][1],stroke:'white','stroke-width':2,tabindex:0,class:'chart-point','aria-label':label,'data-model-id':r.model,'data-x':p.x,'data-y':p.y});
@@ -3298,12 +4192,12 @@ function render(){
  }).join('')||`<tr><td colspan="6">${t('请选择模型。')}</td></tr>`;
  document.querySelectorAll('[data-track]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.track===track)));
  document.querySelectorAll('[data-model]').forEach(b=>b.setAttribute('aria-pressed',String(visible.has(b.dataset.model))));
- $('#track-desc').textContent=t(track==='A'?'最多 8 小时研究墙钟；可多次实验和开租约。':track==='B12'?'最多 12 个训练租约，每次最多 1 小时；GLM 5.3 未完成，已排除。':'最多 6 个训练租约，每次最多 1 小时。');
- $('#table-title').textContent=t('Track {track} · 最终结果',{track});
+ $('#track-desc').textContent=t(track==='TPU'?'4 × Cloud TPU v5e，最多 6 小时研究墙钟。7 个模型走 opencode 容器与推理网关；标 host_cli 的 4 个经 Codex/Cursor 订阅运行，不直接可比。':track==='A'?'最多 8 小时研究墙钟；可多次实验和开租约。':track==='B12'?'最多 12 个训练租约，每次最多 1 小时；GLM 5.3 未完成，已排除。':'最多 6 个训练租约，每次最多 1 小时。');
+ $('#table-title').textContent=t('Track {track} · 最终结果',{track:track==='TPU'?'A · TPU v5e':track});
  const rows=D.rows.filter(r=>lane(r)===track&&visible.has(r.model)).sort((a,b)=>(a.test_nll??Infinity)-(b.test_nll??Infinity));
  drawPlot(rows);
- $('#results').innerHTML=rows.length?rows.map(r=>`<tr><td><span style="color:${defs[r.model][1]}">●</span> ${esc(defs[r.model][0])}</td><td class="num">${fmt(r.test_nll)}</td><td class="num">${fmt(r.score,2)}</td><td class="num">${fmt(r.seconds_per_task,6)}</td><td class="num">${fmt(r.lease_hours,2)}</td><td>${r.candidates}</td><td class="num">${fmt(r.first_analysis,3)} → ${fmt(r.final_analysis,3)}</td></tr>`).join(''):`<tr><td colspan="7">${t('请选择模型。')}</td></tr>`;
- $('#pairs').innerHTML=models.filter(m=>visible.has(m)).map(m=>{const a=D.rows.find(r=>r.model===m&&r.track==='A'),b=D.rows.find(r=>r.model===m&&lane(r)==='B6'),diff=a?.test_nll!=null&&b?.test_nll!=null?b.test_nll-a.test_nll:null;return `<tr><td>${esc(defs[m][0])}</td><td class="num">${fmt(a?.test_nll)}</td><td class="num">${fmt(b?.test_nll)}</td><td class="num" style="color:${diff<0?'var(--green)':'var(--orange)'}">${diff==null?'—':(diff>0?'+':'')+fmt(diff)}</td><td>${diff==null?t('未完成'):diff<0?'B':diff>0?'A':t('相同')}</td></tr>`}).join('')||`<tr><td colspan="5">${t('请选择模型。')}</td></tr>`;
+ $('#results').innerHTML=rows.length?rows.map(r=>`<tr><td><span style="color:${defs[r.model][1]}">●</span> ${esc(defs[r.model][0])}${harness(r)}</td><td class="num">${fmt(r.test_nll)}</td><td class="num">${fmt(r.score,2)}</td><td class="num">${fmt(r.seconds_per_task,6)}</td><td class="num">${fmt(r.lease_hours,2)}</td><td>${r.candidates}</td><td class="num">${fmt(r.first_analysis,3)} → ${fmt(r.final_analysis,3)}</td></tr>`).join(''):`<tr><td colspan="7">${t('请选择模型。')}</td></tr>`;
+ $('#pairs').innerHTML=models.filter(m=>visible.has(m)&&D.rows.some(r=>r.model===m&&lane(r)!=='TPU')).map(m=>{const a=D.rows.find(r=>r.model===m&&lane(r)==='A'),b=D.rows.find(r=>r.model===m&&lane(r)==='B6'),diff=a?.test_nll!=null&&b?.test_nll!=null?b.test_nll-a.test_nll:null;return `<tr><td>${esc(defs[m][0])}</td><td class="num">${fmt(a?.test_nll)}</td><td class="num">${fmt(b?.test_nll)}</td><td class="num" style="color:${diff<0?'var(--green)':'var(--orange)'}">${diff==null?'—':(diff>0?'+':'')+fmt(diff)}</td><td>${diff==null?t('未完成'):diff<0?'B':diff>0?'A':t('相同')}</td></tr>`}).join('')||`<tr><td colspan="5">${t('请选择模型。')}</td></tr>`;
 }
 applyLanguage();
 fillAxes();
